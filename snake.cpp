@@ -84,7 +84,7 @@ int difficulty_level()
     cout << "\t3 - hard" << endl;
     cout << "\t4 - crazy" << endl;
     cout << "\t5 - impossible" << endl;
-    cout << endl << "Выберите уровеень сложности: "; cin >> level; cout << endl;
+    cout << endl << "Выберите уровень сложности: "; cin >> level; cout << endl;
 
     switch (level) {
     case 1:
