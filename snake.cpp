@@ -368,7 +368,7 @@ void random_event()
 int random_bonus()
 {
     srand(time(NULL));
-    int bonus = rand() % 5;
+    int bonus = rand() % 4;
     switch (bonus) {
     case 0:
         score += 15;
@@ -574,64 +574,64 @@ void game_control(bool &invert_control,  sf::RenderWindow& window)
                 int snake_direction_last = snake_direction_queue.empty() ? game_state.snake_direction : snake_direction_queue.at(0);
                 switch (event.key.code) {
                 case sf::Keyboard::Up:
-                    game_paused = false;
                     if (snake_direction_last != SNAKE_DIRECTION_UP && snake_direction_last != SNAKE_DIRECTION_DOWN && type_of_control != 2) {
+                        game_paused = false;
                         if (snake_direction_queue.size() < 2) {
                             snake_direction_queue.insert(snake_direction_queue.begin(), SNAKE_DIRECTION_UP);
                         }
                     }
                     break;
                 case sf::Keyboard::Right:
-                    game_paused = false;
                     if (snake_direction_last != SNAKE_DIRECTION_RIGHT && snake_direction_last !=  SNAKE_DIRECTION_LEFT && type_of_control != 2) {
+                        game_paused = false;
                         if (snake_direction_queue.size() < 2) {
                             snake_direction_queue.insert(snake_direction_queue.begin(), SNAKE_DIRECTION_RIGHT);
                         }
                     }
                     break;
                 case sf::Keyboard::Down:
-                    game_paused = false;
                     if (snake_direction_last != SNAKE_DIRECTION_DOWN && snake_direction_last !=  SNAKE_DIRECTION_UP && type_of_control != 2) {
+                        game_paused = false;
                         if (snake_direction_queue.size() < 2) {
                             snake_direction_queue.insert(snake_direction_queue.begin(), SNAKE_DIRECTION_DOWN);
                         }
                     }
                     break;
                 case sf::Keyboard::Left:
-                    game_paused = false;
                     if (snake_direction_last != SNAKE_DIRECTION_LEFT && snake_direction_last !=  SNAKE_DIRECTION_RIGHT && type_of_control != 2) {
+                        game_paused = false;
                         if (snake_direction_queue.size() < 2) {
                             snake_direction_queue.insert(snake_direction_queue.begin(), SNAKE_DIRECTION_LEFT);
                         }
                     }
                     break;
                 case sf::Keyboard::W:
-                    game_paused = false;
                     if (snake_direction_last != SNAKE_DIRECTION_UP && snake_direction_last != SNAKE_DIRECTION_DOWN && type_of_control == 2) {
+                        game_paused = false;
                         if (snake_direction_queue.size() < 2) {
                             snake_direction_queue.insert(snake_direction_queue.begin(), SNAKE_DIRECTION_UP);
                         }
                     }
                     break;
                 case sf::Keyboard::D:
-                    game_paused = false;
                     if (snake_direction_last != SNAKE_DIRECTION_RIGHT && snake_direction_last != SNAKE_DIRECTION_LEFT && type_of_control == 2) {
+                        game_paused = false;
                         if (snake_direction_queue.size() < 2) {
                             snake_direction_queue.insert(snake_direction_queue.begin(), SNAKE_DIRECTION_RIGHT);
                         }
                     }
                     break;
                 case sf::Keyboard::S:
-                    game_paused = false;
                     if (snake_direction_last != SNAKE_DIRECTION_DOWN && snake_direction_last != SNAKE_DIRECTION_UP && type_of_control == 2) {
+                        game_paused = false;
                         if (snake_direction_queue.size() < 2) {
                             snake_direction_queue.insert(snake_direction_queue.begin(), SNAKE_DIRECTION_DOWN);
                         }
                     }
                     break;
                 case sf::Keyboard::A:
-                    game_paused = false;
                     if (snake_direction_last != SNAKE_DIRECTION_LEFT && snake_direction_last != SNAKE_DIRECTION_RIGHT && type_of_control == 2) {
+                        game_paused = false;
                         if (snake_direction_queue.size() < 2) {
                             snake_direction_queue.insert(snake_direction_queue.begin(), SNAKE_DIRECTION_LEFT);
                         }
@@ -640,7 +640,7 @@ void game_control(bool &invert_control,  sf::RenderWindow& window)
                 case sf::Keyboard::Escape:
                     game_over = true;
                     window.close();
-                    cout << "You are stopped the game!" << endl;
+                    cout << "You stopped the game!" << endl;
                     cout << "Your score: " << score << endl << endl;
                     game_over = false;
                     break;
@@ -664,64 +664,64 @@ void game_control(bool &invert_control,  sf::RenderWindow& window)
                 int snake_direction_last = snake_direction_queue.empty() ? game_state.snake_direction : snake_direction_queue.at(0);
                 switch (event.key.code) {
                 case sf::Keyboard::Down:
-                    game_paused = false;
                     if (snake_direction_last != SNAKE_DIRECTION_UP &&  snake_direction_last !=  SNAKE_DIRECTION_DOWN && type_of_control != 2) {
+                        game_paused = false;
                         if (snake_direction_queue.size() < 2) {
                             snake_direction_queue.insert(snake_direction_queue.begin(), SNAKE_DIRECTION_UP);
                         }
                     }
                     break;
                 case sf::Keyboard::Up:
-                    game_paused = false;
                     if (snake_direction_last != SNAKE_DIRECTION_DOWN && snake_direction_last !=  SNAKE_DIRECTION_UP && type_of_control != 2) {
+                        game_paused = false;
                         if (snake_direction_queue.size() < 2) {
                             snake_direction_queue.insert(snake_direction_queue.begin(), SNAKE_DIRECTION_DOWN);
                         }
                     }
                     break;
                 case sf::Keyboard::Left:
-                    game_paused = false;
                     if (snake_direction_last != SNAKE_DIRECTION_RIGHT && snake_direction_last !=  SNAKE_DIRECTION_LEFT && type_of_control != 2) {
+                        game_paused = false;
                         if (snake_direction_queue.size() < 2) {
                             snake_direction_queue.insert(snake_direction_queue.begin(), SNAKE_DIRECTION_RIGHT);
                         }
                     }
                     break;
                 case sf::Keyboard::Right:
-                    game_paused = false;
                     if (snake_direction_last != SNAKE_DIRECTION_LEFT && snake_direction_last !=  SNAKE_DIRECTION_RIGHT && type_of_control != 2) {
+                        game_paused = false;
                         if (snake_direction_queue.size() < 2) {
                             snake_direction_queue.insert(snake_direction_queue.begin(), SNAKE_DIRECTION_LEFT);
                         }
                     }
                     break;
                 case sf::Keyboard::W:
-                    game_paused = false;
                     if (snake_direction_last != SNAKE_DIRECTION_UP && snake_direction_last != SNAKE_DIRECTION_DOWN && type_of_control == 2) {
+                        game_paused = false;
                         if (snake_direction_queue.size() < 2) {
                             snake_direction_queue.insert(snake_direction_queue.begin(), SNAKE_DIRECTION_UP);
                         }
                     }
                     break;
                 case sf::Keyboard::D:
-                    game_paused = false;
                     if (snake_direction_last != SNAKE_DIRECTION_RIGHT && snake_direction_last != SNAKE_DIRECTION_LEFT && type_of_control == 2) {
+                        game_paused = false;
                         if (snake_direction_queue.size() < 2) {
                             snake_direction_queue.insert(snake_direction_queue.begin(), SNAKE_DIRECTION_RIGHT);
                         }
                     }
                     break;
                 case sf::Keyboard::S:
-                    game_paused = false;
                     if (snake_direction_last != SNAKE_DIRECTION_DOWN && snake_direction_last != SNAKE_DIRECTION_UP && type_of_control == 2) {
+                        game_paused = false;
                         if (snake_direction_queue.size() < 2) {
                             snake_direction_queue.insert(snake_direction_queue.begin(), SNAKE_DIRECTION_DOWN);
                         }
                     }
                     break;
                 case sf::Keyboard::A:
-                    game_paused = false;
                     if (snake_direction_last != SNAKE_DIRECTION_LEFT && snake_direction_last != SNAKE_DIRECTION_RIGHT && type_of_control == 2) {
+                        game_paused = false;
                         if (snake_direction_queue.size() < 2) {
                             snake_direction_queue.insert(snake_direction_queue.begin(), SNAKE_DIRECTION_LEFT);
                         }
