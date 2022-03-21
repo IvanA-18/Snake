@@ -113,7 +113,7 @@ void window_color()
 {
     int color;
     cout << "Доступные стили поля: " << endl;
-    cout << "\t1 - standart\n\t2 - green\n\t3- purple" << endl;
+    cout << "\t1 - standart\n\t2 - green\n\t3- mint" << endl;
     cout << endl << "Выберите стиль: "; cin >> color;
     cin.clear(); cin.ignore();
     cout << endl;
@@ -123,7 +123,7 @@ void window_color()
         r = x; g = y; b = z;
         break;
     case 3:
-        x = 153; y = 51; z = 204;
+        x = 0; y = 255; z = 153;
         r = x; g = y; b = z;
         break;
     default:
