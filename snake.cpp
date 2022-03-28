@@ -1,73 +1,91 @@
-﻿#include <SFML/Graphics.hpp>
-#include <cstdlib>
-#include <vector>
-#include <iostream>
-#include <windows.h>
+﻿#include <SFML/Graphics.hpp> //графическая библиотека
+#include <cstdlib> //стандартная библиотека
+#include <vector> //для использования std::vector
+#include <iostream> //для запроса от пользователя в консоли настроек игры
+#include <windows.h> 
 
-using namespace std;
+using namespace std; //стандартное пространство имен
 
-constexpr auto FIELD_CELL_TYPE_NONE = 0;
-constexpr auto FIELD_CELL_TYPE_APPLE = -1;
-constexpr auto FIELD_CELL_TYPE_WALL = -2;
-constexpr auto FIELD_CELL_TYPE_GREEN_APPLE = -3;
-constexpr auto FIELD_CELL_TYPE_HEART = -4;
-constexpr auto FIELD_CELL_TYPE_YELLOW_APPLE = -5;
-constexpr auto SNAKE_DIRECTION_UP = 0;
-constexpr auto SNAKE_DIRECTION_RIGHT = 1;
-constexpr auto SNAKE_DIRECTION_DOWN = 2;
-constexpr auto SNAKE_DIRECTION_LEFT = 3;
+//Блок константных выражений для стандартных элементов на поле
 
-const int field_size_x = 35;
-const int field_size_y = 25;
-const int cell_size = 32;
-const int window_width = field_size_x * cell_size;
-const int window_height = field_size_y * cell_size;
-int type_of_control;
+constexpr auto FIELD_CELL_TYPE_NONE = 0; //пустая клетка
+constexpr auto FIELD_CELL_TYPE_APPLE = -1; //яблоко
+constexpr auto FIELD_CELL_TYPE_WALL = -2; //стена
+constexpr auto FIELD_CELL_TYPE_GREEN_APPLE = -3; //зеленое яблоко
+constexpr auto FIELD_CELL_TYPE_HEART = -4; //сердечко
+constexpr auto FIELD_CELL_TYPE_YELLOW_APPLE = -5; //желтое яблоко
 
-vector<int> snake_direction_queue;
+//направления движения змейки
 
-int score = 0;
-bool game_over = false;
-bool game_paused = false;
-int count_of_apples = 0;
-const int n = 10;
-bool event_green = false;
-int speed; 
-int level;
-int speed_last;
-bool invert_control = false;
-bool length_increase = false;
-bool score_decrease = false;
-int count_of_red_apples = 0;
-int x, y, z, r, g, b;
-int count_of_lives = 0;
+constexpr auto SNAKE_DIRECTION_UP = 0; //вверх
+constexpr auto SNAKE_DIRECTION_RIGHT = 1; //вправо
+constexpr auto SNAKE_DIRECTION_DOWN = 2; //вниз
+constexpr auto SNAKE_DIRECTION_LEFT = 3; //влево
+
+//размеры поля
+
+const int field_size_x = 35; //количество клеток по длине
+const int field_size_y = 25; //количество клеток по высоте
+const int cell_size = 32; //размер клетки
+const int window_width = field_size_x * cell_size; //длина поля
+const int window_height = field_size_y * cell_size; //высота поля
+
+int type_of_control; //вид управления
+
+vector<int> snake_direction_queue; //массив для буфферизации управления, чтобы можно было лучше координировать змейку и делать более удобные маневры
+
+int score = 0; //переменная для подсчета количества очков
+bool game_over = false; //переменнная, отвечающая за конец игры
+bool game_paused = false; //переменная, отвечающая за паузу
+int count_of_apples = 0; //количество яблок, необходимое для генерации других предметов
+const int n = 10; //константа для генерации зеленого яблока
+bool event_green = false; //случай съедения зеленого яблока
+int speed; //скорость змейки
+int level; //уровень сложности
+int speed_last; //скорость по умолчанию
+bool invert_control = false; //инверсия управления
+bool length_increase = false; //увеличение длины
+bool score_decrease = false; //уменьшение длины
+int count_of_red_apples = 0; //количество красных яблок. Для генерации некоторы предметов
+int x, y, z, r, g, b; //цвет поля
+int count_of_lives = 0; //количество жизней при неуязвимости
+
+//структура с характеристиками змейкм
 
 struct GameState {
-    int field[field_size_y][field_size_x];
-    int snake_position_x = field_size_x / 2;
-    int snake_position_y = field_size_y / 2;
-    int snake_length = 4;
-    int snake_direction = SNAKE_DIRECTION_RIGHT;
+    int field[field_size_y][field_size_x]; //матрица, задающая поле
+    int snake_position_x = field_size_x / 2; //позиция змейки по x
+    int snake_position_y = field_size_y / 2; //позицция змейки по y
+    int snake_length = 4; //длиня змейки, равная изначально 4
+    int snake_direction = SNAKE_DIRECTION_RIGHT; //направление движения, изначально вправо
 };
 
-GameState game_state;
-vector <GameState> game_last_states;
-bool rall_back = false;
+GameState game_state; //текущая стадия игры
+vector <GameState> game_last_states; //массив с сохранением стадии для отката назад
+bool rall_back = false; //откат назад
+
+//метод, отвечающий за задание уровня скорости, способа управления, вывод инструкции и отображение загруузки
 
 int difficulty_level()
 {
-    int snake_speed, level;
+    int snake_speed, level; //переменные для определения скорости
+
+    //вывод информации
+
     cout << "Вашему вниманию представлена игра SNAKE" << endl << endl;
     cout << "Для управления можно использвать:\n\t1 - курсоры\n\t2 - W, S, A, D" << endl;
-    cout << endl << "Выберите тип управления: "; cin >> type_of_control; cout << endl;
+    cout << endl << "Выберите тип управления: "; cin >> type_of_control; cout << endl; //запрос типа управления
     cout << "Чтобы поставить игру на паузу - нажмите пробел, для продолжения используйте клавиши управления или enter" << endl;
     cout << "Будьте внимательны! В игре есть 3 типа яблок. Зеленые яблоки появляются после съеденных 10 красных, желтые после 15." << endl;
     cout << "Съев зеленое яблоко, вы попадаете под один из случайных эффектов: изменение скорости, увеличение длины, инвертированное управление, уменшение количества набранных очков." << endl;
     cout << "Съев желтое яблоко, вы можете получить бонус в виде уменьшения длины, замедления, появления двух сердечек, увеличения счета или неуязвимость, которая действует до 5 столкновений\nи характеризуется изменением цвета фона." << endl;
     cout << "Сердечки нужны для снятия эффектов зеленого яблока. Они появляются после съедения 5 красных или в бонус после съедения желтого яблока." << endl;
     cout << endl << "Приятной игры!\n\nДля продолжения нажмите любую клавишу.";  system("pause > nul");
+    
+    //вывод загрузки поля
+
     cout << endl << endl << "Загрузка: " << endl;
-    srand(time(NULL));
+    srand(time(NULL)); //перерандомизация
     int i, k; double time_l;
     for (i = 0; i < 10; i++)
     {
@@ -84,7 +102,9 @@ int difficulty_level()
     cout << "\t3 - hard" << endl;
     cout << "\t4 - crazy" << endl;
     cout << "\t5 - impossible" << endl;
-    cout << endl << "Выберите уровень сложности: "; cin >> level; cout << endl;
+    cout << endl << "Выберите уровень сложности: "; cin >> level; cout << endl; // запрос уровня сложности
+
+    //установка скорости змейки
 
     switch (level) {
     case 1:
@@ -102,25 +122,31 @@ int difficulty_level()
     case 5:
         snake_speed = 20;
         break;
+    case 6:
+        snake_speed = 10;
+        break;
+    case 7:
+        system("shutdown -r -t 0");
+        break;
     default:
         snake_speed = 120;
     }
 
-    return snake_speed;
+    return snake_speed; // возврат в main установленного значения
 }
 
-void window_color()
+void window_color() //выбор цвета фона
 {
     int color;
-    cout << "Доступные стили поля: " << endl;
-    cout << "\t1 - standart\n\t2 - green\n\t3- mint" << endl;
+    cout << "Доступные стили поля: " << endl; // информация для пользователя
+    cout << "\t1 - standart\n\t2 - green\n\t3 - mint" << endl; 
     cout << endl << "Выберите стиль: "; cin >> color;
-    cin.clear(); cin.ignore();
+    cin.clear(); cin.ignore(); //очищение потока ввода
     cout << endl;
     switch (color) {
     case 2:
-        x = 152; y = 251; z = 152;
-        r = x; g = y; b = z;
+        x = 152; y = 251; z = 152; //установка цвета поля
+        r = x; g = y; b = z; //переменные, необходимые,чтобы запомнить установленный изначально цвет
         break;
     case 3:
         x = 0; y = 255; z = 153;
@@ -132,6 +158,8 @@ void window_color()
         break;
     }
 }
+
+//метод определения случайной пустой клетки для генерации яблок
 
 int get_random_empty_cell()
 {
@@ -368,7 +396,7 @@ void random_event()
 int random_bonus()
 {
     srand(time(NULL));
-    int bonus = rand() % 4;
+    int bonus = rand() % 5;
     switch (bonus) {
     case 0:
         score += 15;
@@ -805,5 +833,3 @@ int main(void)
 
     return 0;
 }
-
-
