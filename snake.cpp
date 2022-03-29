@@ -434,28 +434,35 @@ int random_bonus()
 
 void normal_game()
 {
-    speed = speed_last;
-    if (count_of_lives == 0) {
-        x = r; y = g; z = b;
+    speed = speed_last; // установка начального уровня скорости
+    if (count_of_lives == 0) { 
+        x = r; y = g; z = b; // установка начального цыета поля
     }
-    invert_control = false;
+    invert_control = false; // выключение инверсии
     if (length_increase) {
-        length_increase = false;
-        game_state.snake_length -= 3;
+        length_increase = false; // переключение переменной, отвечающей за длину
+        game_state.snake_length -= 3; // уменьшение длины
     }
     if (score_decrease) {
-        score_decrease = false;
-        score += 10;
+        score_decrease = false; //переключение переменной, отвечающей за счет
+        score += 10; // уменьшение счета
     }
 }
 
-void make_move()
+//метод, отвечающий за движение и изменение поля
+
+void make_move() 
 {
-    game_last_states.push_back(game_state);
+    // запоминаем позицию змейки на 10 передвижений
+
+    game_last_states.push_back(game_state); 
     if (game_last_states.size() > 10) {
         game_last_states.erase(game_last_states.begin());
     }
-    switch (game_state.snake_direction) {
+
+    //установка направления движения змейкм
+
+    switch (game_state.snake_direction) { 
     case SNAKE_DIRECTION_UP:
         game_state.snake_position_y--;
         if (game_state.snake_position_y < 0) {
@@ -481,50 +488,52 @@ void make_move()
         }
         break;
     }
+    
+    //если змейка с чем-то провзаимодействовала
 
     if (game_state.field[game_state.snake_position_y][game_state.snake_position_x] != FIELD_CELL_TYPE_NONE) {
         switch (game_state.field[game_state.snake_position_y][game_state.snake_position_x]) {
-        case FIELD_CELL_TYPE_APPLE:
+        case FIELD_CELL_TYPE_APPLE: // случай - яблоко
             score++;
-            game_state.snake_length++;
-            count_of_apples++;
-            if (count_of_apples == n) {
+            game_state.snake_length++; // увеличение длины на 1
+            count_of_apples++; // считаем количество съеденных яблок
+            if (count_of_apples == n) { // если их 10 - гененрируем одно зеленое
                 add_green_apple();
-                count_of_apples = 0;
+                count_of_apples = 0; // обнуляем количество съеденных до зеленого яблок
             }
-            count_of_red_apples++;
-            if (count_of_red_apples == 5) {
+            count_of_red_apples++; // считаем количество съеденных яблок для генерации сердечечка
+            if (count_of_red_apples == 5) { // если 5 - гененрируем сердечко
                 add_heart();
             }
-            if (score != 0 && score % 15 == 0) {
+            if (score != 0 && score % 15 == 0) { //генерация желтого яблока в млучае, если съедено 15 красных
                 add_yellow_apple();
             }
-            grow_snake();
-            add_apple();
+            grow_snake(); // увеличение змейки
+            add_apple(); // генерация нового яблока
             break;
-        case FIELD_CELL_TYPE_GREEN_APPLE:
-            count_of_red_apples = 0;
-            count_of_apples = 0;
-            random_event();
-            if (count_of_lives == 0) {
-                x = 50; y = 185; z = 50;
+        case FIELD_CELL_TYPE_GREEN_APPLE: // случай - зеленое яблоко
+            count_of_red_apples = 0; // подготовка к генерации сердечкка через 5 яблок
+            count_of_apples = 0; // установка в 0 отсчета до следующего зеленого яблока
+            random_event(); // получение случайной ловушки
+            if (count_of_lives == 0) { 
+                x = 50; y = 185; z = 50; //изменение цвета поля
             }
             break;
-        case FIELD_CELL_TYPE_YELLOW_APPLE:
-            if (random_bonus() == 1) {
+        case FIELD_CELL_TYPE_YELLOW_APPLE: // случай - желтое яблоко
+            if (random_bonus() == 1) { // получение случайного бонуса
                 for (int m = 0; m < 2; m++) {
-                    add_heart();
+                    add_heart(); // генерация двух сердечек в случае получения 1 в генераторе случайных чисел
                 }
             }
             break;
-        case FIELD_CELL_TYPE_HEART:
-            normal_game();
+        case FIELD_CELL_TYPE_HEART: // случай - сердечко
+            normal_game(); // восставновление параметров игры
             break;
-        case FIELD_CELL_TYPE_WALL:
-            if (count_of_lives != 0) {
-                rall_back = true;
-                count_of_lives--;
-                switch (count_of_lives) {
+        case FIELD_CELL_TYPE_WALL: //случай - стена
+            if (count_of_lives != 0) { //если есть неуязвимость, проверяем, сколько осталось жизней
+                rall_back = true; //откат включен
+                count_of_lives--; // уменьшаем количество жизней
+                switch (count_of_lives) { //меняем фон
                 case 4:
                     x = 255; y = 20; z = 147;
                     break;
@@ -542,10 +551,10 @@ void make_move()
                 }
             }
             else {
-                game_over = true;
+                game_over = true; // иначе конец игры
             }
             break;
-        default:
+        default: // аналогично, если врезались в себя
             if (game_state.field[game_state.snake_position_y][game_state.snake_position_x] > 1) {
                 if (count_of_lives != 0) {
                     rall_back = true;
@@ -577,7 +586,7 @@ void make_move()
         }
     }
 
-    if (!rall_back) {
+    if (!rall_back) { //перемещение змейки
         for (int j = 0; j < field_size_y; j++) {
             for (int i = 0; i < field_size_x; i++) {
                 if (game_state.field[j][i] > FIELD_CELL_TYPE_NONE) {
@@ -587,35 +596,39 @@ void make_move()
             }
         }
 
-        game_state.field[game_state.snake_position_y][game_state.snake_position_x] = game_state.snake_length;
+        game_state.field[game_state.snake_position_y][game_state.snake_position_x] = game_state.snake_length; // бновление информации об игре
     }
 }
 
-void start_game()
+void start_game() // начало игры
 {
-    game_state.snake_position_x = field_size_x / 2;
+    game_state.snake_position_x = field_size_x / 2; // установка змейки на начальную позицию
     game_state.snake_position_y = field_size_y / 2;
     game_state.snake_length = 4;
-    game_state.snake_direction = SNAKE_DIRECTION_RIGHT;
-    score = 0;
-    window_color();
-    clear_field();
+    game_state.snake_direction = SNAKE_DIRECTION_RIGHT; // начальное направление - вправо
+    score = 0; // счет равен 0
+    window_color(); //установка цвета окна
+    clear_field(); // очищение поля
 }
 
-void game_control(bool &invert_control,  sf::RenderWindow& window)
+
+//метод управления игрой
+
+void game_control(bool &invert_control,  sf::RenderWindow& window) 
 {
-    sf::Event event;
-    if (invert_control == false) {
+    sf::Event event; 
+    if (invert_control == false) { // если управление инвертировано
         while (window.pollEvent(event))
         {
-            if (event.type == sf::Event::Closed)
-                window.close();
+            if (event.type == sf::Event::Closed) 
+                window.close(); // закрытие окна
 
             if (event.type == sf::Event::KeyPressed) {
-                int snake_direction_last = snake_direction_queue.empty() ? game_state.snake_direction : snake_direction_queue.at(0);
-                switch (event.key.code) {
+                int snake_direction_last = snake_direction_queue.empty() ? game_state.snake_direction : snake_direction_queue.at(0); 
+                switch (event.key.code) { // проверка нажатия той или иной клавиши
                 case sf::Keyboard::Up:
-                    if (snake_direction_last != SNAKE_DIRECTION_UP && snake_direction_last != SNAKE_DIRECTION_DOWN && type_of_control != 2) {
+                    if (snake_direction_last != SNAKE_DIRECTION_UP && snake_direction_last != SNAKE_DIRECTION_DOWN && type_of_control != 2) { // проверка направления, чтобы не врезаться в себя в обратную 
+                        //сторону. изменение направления движения. для остальных клавиш аналогично
                         game_paused = false;
                         if (snake_direction_queue.size() < 2) {
                             snake_direction_queue.insert(snake_direction_queue.begin(), SNAKE_DIRECTION_UP);
@@ -678,17 +691,17 @@ void game_control(bool &invert_control,  sf::RenderWindow& window)
                         }
                     }
                     break;
-                case sf::Keyboard::Escape:
-                    game_over = true;
+                case sf::Keyboard::Escape: // в случае нажатия esc
+                    game_over = true; // выход из игры
                     window.close();
                     cout << "You stopped the game!" << endl;
-                    cout << "Your score: " << score << endl << endl;
+                    cout << "Your score: " << score << endl << endl; // вывод счета
                     game_over = false;
                     break;
-                case sf::Keyboard::Space:
-                    game_paused = true;
+                case sf::Keyboard::Space: // пробел
+                    game_paused = true; // установка игры на паузу
                     break;
-                case sf::Keyboard::Enter:
+                case sf::Keyboard::Enter: // enter для продолжения в текущем направлении
                     game_paused = false;
                     break;
 
@@ -696,7 +709,7 @@ void game_control(bool &invert_control,  sf::RenderWindow& window)
             }
         }
     }
-    else {
+    else { // аналогично для классического кправления
         while (window.pollEvent(event))
         {
             if (event.type == sf::Event::Closed)
@@ -787,62 +800,62 @@ void game_control(bool &invert_control,  sf::RenderWindow& window)
     }
 }
 
-int main(void)
+int main(void) // main
 {
-    system("color B0");
-    setlocale(0, "");
+    system("color B0"); // цвет консоли
+    setlocale(0, ""); // русский язык
 
-    srand(time(NULL));
+    srand(time(NULL)); //рандомизация
 
-    speed = difficulty_level();
-    speed_last = speed;
+    speed = difficulty_level(); // уровень сложности
+    speed_last = speed; // скорость по умолчанию
 
-    start_game();
+    start_game(); // начало игры
 
-    sf::RenderWindow window(sf::VideoMode(window_width, window_height), "snake", sf::Style::Close);
+    sf::RenderWindow window(sf::VideoMode(window_width, window_height), "snake", sf::Style::Close); // открытие окна
 
-    while (window.isOpen()){
-        game_control(invert_control, window);
+    while (window.isOpen()){ // пока окно открыто
+        game_control(invert_control, window); // подключение управления
 
-        if (!snake_direction_queue.empty()) {
+        if (!snake_direction_queue.empty()) { // буферизация управления
             game_state.snake_direction = snake_direction_queue.back();
             snake_direction_queue.pop_back();
         }
 
-        if (!game_paused) {
-            if (!rall_back) {
-                make_move();
+        if (!game_paused) { //если не пауза
+            if (!rall_back) { // если не откат
+                make_move(); //обновляем поле
             }
             else {
-                if (!game_last_states.empty()) {
+                if (!game_last_states.empty()) { //откат
                     game_state = game_last_states.back();
                     game_last_states.pop_back();
                 }
                 else {
-                    rall_back = false;
+                    rall_back = false; // выключение отката
                 }
             }
         }
 
-        if (game_over) {
+        if (game_over) { // если не откат и конец игры
             if (!rall_back) {
-                sf::sleep(sf::seconds(1));
-                window.close();
+                sf::sleep(sf::seconds(1)); // задержка на 1 секунду
+                window.close(); // хакрытие окна
                 cout << "It's GAMEOVER!" << endl;
                 cout << endl << "Your score: " << score << endl << endl;
             }
         }
 
 
-        window.clear(sf::Color(x, y, z));
-        draw_field(window);
+        window.clear(sf::Color(x, y, z)); //цвет поля
+        draw_field(window); // отрисовка поля
 
-        window.display();
+        window.display(); // вывод окна
 
-        sf::sleep(sf::milliseconds(speed));
+        sf::sleep(sf::milliseconds(speed)); // скорость
         }
     
-    system("pause");
+    system("pause"); // удержание консоли
 
     return 0;
 }
