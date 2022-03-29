@@ -108,7 +108,7 @@ int difficulty_level()
 
     switch (level) {
     case 1:
-        snake_speed = 100;
+        snake_speed = 100; 
         break;
     case 2:
         snake_speed = 80;
@@ -163,11 +163,11 @@ void window_color() //выбор цвета фона
 
 int get_random_empty_cell()
 {
-    int empty_cell_count = 0;
+    int empty_cell_count = 0; // количество пустых клеток на данный момент
     for (int j = 0; j < field_size_y; j++) {
         for (int i = 0; i < field_size_x; i++) {
             if (game_state.field[j][i] == FIELD_CELL_TYPE_NONE) {
-                empty_cell_count++;
+                empty_cell_count++; // считаем количество пустых клеток
             }
         }
     }
@@ -175,34 +175,33 @@ int get_random_empty_cell()
     int target_empty_cell_index = rand() % empty_cell_count;
     int empty_cell_index = 0;
 
+    //генерация и поиск случайной пустой клетки из общего количества
+
     for (int j = 0; j < field_size_y; j++) {
         for (int i = 0; i < field_size_x; i++) {
             if (game_state.field[j][i] == FIELD_CELL_TYPE_NONE) {
                 if (empty_cell_index == target_empty_cell_index) {
                     return j * field_size_x + i;
                 }
-                empty_cell_index++;
+                empty_cell_index++; 
             }
         }
     }
-    return -1;
+    return -1; // не осталсь пустых клеток
 }
+
+//методы получения предметов на поле
 
 void add_apple()
 {
-    int apple_pos = get_random_empty_cell();
-    if (apple_pos != -1) {
-        if (count_of_apples != n){
-            game_state.field[apple_pos / field_size_x][apple_pos % field_size_x] = FIELD_CELL_TYPE_APPLE;
+    int apple_pos = get_random_empty_cell(); // получение координаты пустой клетки
+    if (apple_pos != -1) { //проверка, нашлась ли пустая клетка
+        game_state.field[apple_pos / field_size_x][apple_pos % field_size_x] = FIELD_CELL_TYPE_APPLE; // заменяем пустую клетку красным яблоком
         }
-        else {
-            game_state.field[apple_pos / field_size_x][apple_pos % field_size_x] = FIELD_CELL_TYPE_GREEN_APPLE;
-        }
-    }
     
 }
 
-void add_heart()
+void add_heart() // метод работает аналогичнго предыдущему
 {
     int heart_pos = get_random_empty_cell();
     if (heart_pos != -1) {
@@ -210,7 +209,7 @@ void add_heart()
     }
 }
 
-void add_yellow_apple()
+void add_yellow_apple() // желтое яблоко получаем также
 {
     int yellow_apple_pos = get_random_empty_cell();
     if (yellow_apple_pos != -1) {
@@ -218,7 +217,7 @@ void add_yellow_apple()
     }
 }
 
-void add_green_apple()
+void add_green_apple() //зеленое аналогично
 {
     int green_apple_pos = get_random_empty_cell();
     if (green_apple_pos != -1) {
@@ -226,111 +225,117 @@ void add_green_apple()
     }
 }
 
+//метод очищения поля для генерации стен, первого зеленого и красного яблока, пустых клеток, змейки на анчальной позиции
+
 void clear_field()
 {
     for (int j = 0; j < field_size_y; j++) {
         for (int i = 0; i < field_size_x; i++) {
-            game_state.field[j][i] = FIELD_CELL_TYPE_NONE;
+            game_state.field[j][i] = FIELD_CELL_TYPE_NONE; // генерация пустых клеток
         }
     }
-    for (int i = 0; i < game_state.snake_length; i++)
+
+    for (int i = 0; i < game_state.snake_length; i++) //установка позиции змейки в начале 
         game_state.field[game_state.snake_position_y][game_state.snake_position_x - i] = game_state.snake_length - i;
     
     for (int i = 0; i < field_size_x; i++) {
         if (i < 10 || field_size_x - i - 1 < 10) {
             game_state.field[0][i] = FIELD_CELL_TYPE_WALL;
-            game_state.field[field_size_y - 1][i] = FIELD_CELL_TYPE_WALL;
+            game_state.field[field_size_y - 1][i] = FIELD_CELL_TYPE_WALL; //генерация горизонтальных стен
         }
     }
 
     for (int j = 1; j < field_size_y - 1; j++) {
         if (j < 8 || field_size_y - j - 1 < 8) {
-            game_state.field[j][0] = FIELD_CELL_TYPE_WALL;
-            game_state.field[j][field_size_x - 1] = FIELD_CELL_TYPE_WALL;
+            game_state.field[j][0] = FIELD_CELL_TYPE_WALL; // генерация уголка
+            game_state.field[j][field_size_x - 1] = FIELD_CELL_TYPE_WALL; // генерация вертикальных стен
         }
     }
-    add_green_apple();
-    add_apple();
+
+    add_green_apple(); // генерация зеленого ябллока
+    add_apple(); // генерация красного яблока
 }
 
-void draw_field(sf::RenderWindow &window)
+//метод отрисовки поля
+
+void draw_field(sf::RenderWindow &window) 
 {
-    sf::Texture none_texture;
-    none_texture.loadFromFile("images/none.png");
-    sf::Sprite none;
-    none.setTexture(none_texture);
+    sf::Texture none_texture; //текстура пустой клетки
+    none_texture.loadFromFile("images/none.png"); //загрузка изображения пустой клетки
+    sf::Sprite none; //спрайт пустой клетки
+    none.setTexture(none_texture); //установка текстуры
 
-    sf::Texture snake_texture;
-    snake_texture.loadFromFile("images/snake.png");
-    sf::Sprite snake;
-    snake.setTexture(snake_texture);
+    sf::Texture snake_texture; //текстура змейки
+    snake_texture.loadFromFile("images/snake.png"); //загрузка элеимента змейки
+    sf::Sprite snake; // спрайт
+    snake.setTexture(snake_texture); //установка текстуры
 
-    sf::Texture snake_head_texture;
-    snake_head_texture.loadFromFile("images/head.png");
-    sf::Sprite snake_head;
-    snake_head.setTexture(snake_head_texture);
+    sf::Texture snake_head_texture; //текстура головы змйки  
+    snake_head_texture.loadFromFile("images/head.png"); //загрузка ищображения
+    sf::Sprite snake_head; //спрайт
+    snake_head.setTexture(snake_head_texture); //установка текстуры
 
-    sf::Texture apple_texture;
-    apple_texture.loadFromFile("images/apple.png");
-    sf::Sprite apple;
-    apple.setTexture(apple_texture);
+    sf::Texture apple_texture; //текстура красного яблока
+    apple_texture.loadFromFile("images/apple.png"); //загрузка изображения
+    sf::Sprite apple; //спрайт
+    apple.setTexture(apple_texture); //установка текстуры
 
-    sf::Texture apple_green_texture;
-    apple_green_texture.loadFromFile("images/apple_green.png");
-    sf::Sprite apple_green;
-    apple_green.setTexture(apple_green_texture);
+    sf::Texture apple_green_texture; //текстура зеленого яблока
+    apple_green_texture.loadFromFile("images/apple_green.png"); //загрузка изображения
+    sf::Sprite apple_green; //спрайт
+    apple_green.setTexture(apple_green_texture); //установка текстуры
 
-    sf::Texture apple_yellow_texture;
-    apple_yellow_texture.loadFromFile("images/yelow_apple.png");
-    sf::Sprite apple_yellow;
-    apple_yellow.setTexture(apple_yellow_texture);
+    sf::Texture apple_yellow_texture; //текстура желтого яблока
+    apple_yellow_texture.loadFromFile("images/yelow_apple.png"); //загрузка изображения
+    sf::Sprite apple_yellow; //спрайт
+    apple_yellow.setTexture(apple_yellow_texture); //установка текстуры
 
-    sf::Texture wall_texture;
-    wall_texture.loadFromFile("images/wall.png");
-    sf::Sprite wall;
-    wall.setTexture(wall_texture);
+    sf::Texture wall_texture; //текстура стены
+    wall_texture.loadFromFile("images/wall.png"); //загрузка изображения
+    sf::Sprite wall; //спрайт
+    wall.setTexture(wall_texture); //установка текстуры
 
-    sf::Texture heart_texture;
-    heart_texture.loadFromFile("images/life.png");
-    sf::Sprite heart;
-    heart.setTexture(heart_texture);
+    sf::Texture heart_texture; //текстура сердечка
+    heart_texture.loadFromFile("images/life.png"); //загрузка изображения
+    sf::Sprite heart; //спрайт
+    heart.setTexture(heart_texture); //установка текстуры
 
     for (int j = 0; j < field_size_y; j++) {
         for (int i = 0; i < field_size_x; i++) {
-            switch (game_state.field[j][i]) {
+            switch (game_state.field[j][i]) { //проверяем тип текстуры
             case FIELD_CELL_TYPE_NONE:
                 none.setPosition(float(i * cell_size), float(j * cell_size));
-                window.draw(none);
+                window.draw(none); //отрисовка пустой клетки
                 break;
             case FIELD_CELL_TYPE_APPLE:
                 apple.setPosition(float(i * cell_size), float(j * cell_size));
-                window.draw(apple);
+                window.draw(apple); //отрисовка красного  яблока
                 break;
             case FIELD_CELL_TYPE_GREEN_APPLE:
                 apple_green.setPosition(float(i * cell_size), float(j * cell_size));
-                window.draw(apple_green);
+                window.draw(apple_green); //отрисовка зеленого яблока
                 break;
             case FIELD_CELL_TYPE_YELLOW_APPLE:
                 apple_yellow.setPosition(float(i * cell_size), float(j * cell_size));
-                window.draw(apple_yellow);
+                window.draw(apple_yellow); //отрисовка желтого яблока
                 break;
             case FIELD_CELL_TYPE_WALL:
                 wall.setPosition(float(i * cell_size), float(j * cell_size));
-                window.draw(wall);
+                window.draw(wall); //отрисовка стены
                 break;
             case FIELD_CELL_TYPE_HEART:
                 heart.setPosition(float(i * cell_size), float(j * cell_size));
-                window.draw(heart);
+                window.draw(heart); //отрисовка сердечка
                 break;
             default:
                 if (game_state.field[j][i] == game_state.snake_length) {
-                    float offset_x = snake_head.getLocalBounds().width / 2;
+                    float offset_x = snake_head.getLocalBounds().width / 2; //установка координат головы змейки
                     float offset_y = snake_head.getLocalBounds().height / 2;
                     snake_head.setPosition(float(i * cell_size + offset_x), float(j * cell_size + offset_y));
                     snake_head.setOrigin(offset_x, offset_y);
-                    switch (game_state.snake_direction) {
+                    switch (game_state.snake_direction) { //поворот головы в зависимости от направления
                     case SNAKE_DIRECTION_RIGHT:
-                        snake_head.setRotation(90);
+                        snake_head.setRotation(90); 
                         break;
                     case SNAKE_DIRECTION_LEFT:
                         snake_head.setRotation(-90);
@@ -343,81 +348,89 @@ void draw_field(sf::RenderWindow &window)
                         break;
                     }
 
-                    window.draw(snake_head);
+                    window.draw(snake_head); // отрисовка головы
                 }
                 else {
                     snake.setPosition(float(i * cell_size), float(j * cell_size));
-                    window.draw(snake);
+                    window.draw(snake); // отрисовка остальной змейки
                 }
             }
         }
     }
 }
+
+//метод увеличения длины
 
 void grow_snake()
 {
     for (int j = 0; j < field_size_y; j++) {
         for (int i = 0; i < field_size_x; i++) {
-            if (game_state.field[j][i] > FIELD_CELL_TYPE_NONE) {
-                game_state.field[j][i]++;
+            if (game_state.field[j][i] > FIELD_CELL_TYPE_NONE) { // проверяем текущую клетку
+                game_state.field[j][i]++; // увеличиваем длину змейки
             }
         }
     }
 }
 
+//метод получения случайного события при съедении зеленого яблока
+
 void random_event()
 {
     srand(time(NULL));
     int random_trap;
-    random_trap = rand() % 4;
+    random_trap = rand() % 4; //генерация случайного числа
     switch (random_trap) {
     case 0:
-        invert_control = true;
+        invert_control = true; // инверсия управления
         break;
     case 1:
-        speed = 50;
+        speed = 50; // ускорение
         break;
     case 2:
         if (score >= 10) {
-            score -= 10;
+            score -= 10; //уменьшение счета
         }
         else {
             score = 0;
         }
-        score_decrease = true;
+        score_decrease = true; // запоминаем, что счет уменьшен для того, чтобы вернуться в начальное состояние
         break;
     case 3:
-        game_state.snake_length += 3;
-        length_increase = true;
+        game_state.snake_length += 3; // увеличение длины
+        length_increase = true; //запоминаем, что длина была увеличена
         break;
     }
 }
 
+//метод получения случайного бонуса при съедении желтого яблока
+
 int random_bonus()
 {
     srand(time(NULL));
-    int bonus = rand() % 5;
+    int bonus = rand() % 5; // генерация случайного числа
     switch (bonus) {
     case 0:
-        score += 15;
+        score += 15; // увеличение счета
         break;
     case 1:
         return 1;
         break;
     case 2:
-        speed = 130;
+        speed = 130; // замедление
         break;
     case 3:
         if (game_state.snake_length >= 9) {
-            game_state.snake_length -= 5;
+            game_state.snake_length -= 5; //уменьшение длины
         }
         break;
     case 4:
-        count_of_lives = 5;
-        x = 0; y = 220; z = 255;
+        count_of_lives = 5; // неуязвимость
+        x = 0; y = 220; z = 255; // изменнение цвета поля при неуязвимости
         break;
     }
 }
+
+//восставновление настроек игры при сбросе эффекта зеленого яблока
 
 void normal_game()
 {
