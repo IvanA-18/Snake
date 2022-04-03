@@ -24,7 +24,7 @@ constexpr auto SNAKE_DIRECTION_LEFT = 3; //влево
 
 //размеры поля
 
-const int field_size_x = 35; //количество клеток по длине
+const int field_size_x = 40; //количество клеток по длине
 const int field_size_y = 25; //количество клеток по высоте
 const int cell_size = 32; //размер клетки
 const int window_width = field_size_x * cell_size; //длина поля
