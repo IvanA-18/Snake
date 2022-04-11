@@ -3,6 +3,7 @@
 #include <vector> //для использования std::vector
 #include <iostream> //для запроса от пользователя в консоли настроек игры
 #include <windows.h> 
+#include <string>
 
 using namespace std; //стандартное пространство имен
 
@@ -33,7 +34,7 @@ const int window_height = field_size_y * cell_size; //высота поля
 int type_of_control; //вид управления
 
 vector<int> snake_direction_queue; //массив для буфферизации управления, чтобы можно было лучше координировать змейку и делать более удобные маневры
-
+int last_score = 0;
 int score = 0; //переменная для подсчета количества очков
 bool game_over = false; //переменнная, отвечающая за конец игры
 bool game_paused = false; //переменная, отвечающая за паузу
@@ -49,6 +50,10 @@ bool score_decrease = false; //уменьшение длины
 int count_of_red_apples = 0; //количество красных яблок. Для генерации некоторы предметов
 int x, y, z, r, g, b; //цвет поля
 int count_of_lives = 0; //количество жизней при неуязвимости
+bool exit_game; // переменная, отвечающая за выход
+bool immortality = false;
+string code;
+string immortality_code = "2603_Alekseev_I_I_2219";
 
 //структура с характеристиками змейкм
 
@@ -72,16 +77,31 @@ int difficulty_level()
 
     //вывод информации
 
-    cout << "Вашему вниманию представлена игра SNAKE" << endl << endl;
     cout << "Для управления можно использвать:\n\t1 - курсоры\n\t2 - W, S, A, D" << endl;
     cout << endl << "Выберите тип управления: "; cin >> type_of_control; cout << endl; //запрос типа управления
+    if (type_of_control == 3) {
+        cout << "Введите код бессмертия: ";
+        cin.clear(); cin.ignore();
+        getline(cin, code);
+        if (code == immortality_code) {
+            immortality = true;
+            count_of_lives = 1;
+            cout << "Code is correct!" << endl;
+        }
+
+        else {
+            cout << "Invalide code!" << endl;
+        }
+        
+        cout << endl << "Выберите тип управления: "; cin >> type_of_control; cout << endl;
+    }
     cout << "Чтобы поставить игру на паузу - нажмите пробел, для продолжения используйте клавиши управления или enter" << endl;
     cout << "Будьте внимательны! В игре есть 3 типа яблок. Зеленые яблоки появляются после съеденных 10 красных, желтые после 15." << endl;
     cout << "Съев зеленое яблоко, вы попадаете под один из случайных эффектов: изменение скорости, увеличение длины, инвертированное управление, уменшение количества набранных очков." << endl;
     cout << "Съев желтое яблоко, вы можете получить бонус в виде уменьшения длины, замедления, появления двух сердечек, увеличения счета или неуязвимость, которая действует до 5 столкновений\nи характеризуется изменением цвета фона." << endl;
     cout << "Сердечки нужны для снятия эффектов зеленого яблока. Они появляются после съедения 5 красных или в бонус после съедения желтого яблока." << endl;
     cout << endl << "Приятной игры!\n\nДля продолжения нажмите любую клавишу.";  system("pause > nul");
-    
+
     //вывод загрузки поля
 
     cout << endl << endl << "Загрузка: " << endl;
@@ -108,7 +128,7 @@ int difficulty_level()
 
     switch (level) {
     case 1:
-        snake_speed = 100; 
+        snake_speed = 100;
         break;
     case 2:
         snake_speed = 80;
@@ -139,7 +159,7 @@ void window_color() //выбор цвета фона
 {
     int color;
     cout << "Доступные стили поля: " << endl; // информация для пользователя
-    cout << "\t1 - standart\n\t2 - green\n\t3 - mint" << endl; 
+    cout << "\t1 - standart\n\t2 - green\n\t3 - mint" << endl;
     cout << endl << "Выберите стиль: "; cin >> color;
     cin.clear(); cin.ignore(); //очищение потока ввода
     cout << endl;
@@ -183,7 +203,7 @@ int get_random_empty_cell()
                 if (empty_cell_index == target_empty_cell_index) {
                     return j * field_size_x + i;
                 }
-                empty_cell_index++; 
+                empty_cell_index++;
             }
         }
     }
@@ -197,8 +217,8 @@ void add_apple()
     int apple_pos = get_random_empty_cell(); // получение координаты пустой клетки
     if (apple_pos != -1) { //проверка, нашлась ли пустая клетка
         game_state.field[apple_pos / field_size_x][apple_pos % field_size_x] = FIELD_CELL_TYPE_APPLE; // заменяем пустую клетку красным яблоком
-        }
-    
+    }
+
 }
 
 void add_heart() // метод работает аналогичнго предыдущему
@@ -237,7 +257,7 @@ void clear_field()
 
     for (int i = 0; i < game_state.snake_length; i++) //установка позиции змейки в начале 
         game_state.field[game_state.snake_position_y][game_state.snake_position_x - i] = game_state.snake_length - i;
-    
+
     for (int i = 0; i < field_size_x; i++) {
         if (i < 10 || field_size_x - i - 1 < 10) {
             game_state.field[0][i] = FIELD_CELL_TYPE_WALL;
@@ -258,7 +278,7 @@ void clear_field()
 
 //метод отрисовки поля
 
-void draw_field(sf::RenderWindow &window) 
+void draw_field(sf::RenderWindow& window)
 {
     sf::Texture none_texture; //текстура пустой клетки
     none_texture.loadFromFile("images/none.png"); //загрузка изображения пустой клетки
@@ -335,7 +355,7 @@ void draw_field(sf::RenderWindow &window)
                     snake_head.setOrigin(offset_x, offset_y);
                     switch (game_state.snake_direction) { //поворот головы в зависимости от направления
                     case SNAKE_DIRECTION_RIGHT:
-                        snake_head.setRotation(90); 
+                        snake_head.setRotation(90);
                         break;
                     case SNAKE_DIRECTION_LEFT:
                         snake_head.setRotation(-90);
@@ -407,7 +427,13 @@ void random_event()
 int random_bonus()
 {
     srand(time(NULL));
-    int bonus = rand() % 5; // генерация случайного числа
+    int bonus;
+    if (immortality) {
+        bonus = rand() % 4; // генерация случайного числа
+    }
+    else {
+        bonus = rand() % 5;
+    }
     switch (bonus) {
     case 0:
         score += 15; // увеличение счета
@@ -435,7 +461,7 @@ int random_bonus()
 void normal_game()
 {
     speed = speed_last; // установка начального уровня скорости
-    if (count_of_lives == 0) { 
+    if (count_of_lives == 0) {
         x = r; y = g; z = b; // установка начального цыета поля
     }
     invert_control = false; // выключение инверсии
@@ -445,24 +471,24 @@ void normal_game()
     }
     if (score_decrease) {
         score_decrease = false; //переключение переменной, отвечающей за счет
-        score += 10; // уменьшение счета
+        score = last_score; // уменьшение счета
     }
 }
 
 //метод, отвечающий за движение и изменение поля
 
-void make_move() 
+void make_move()
 {
     // запоминаем позицию змейки на 10 передвижений
 
-    game_last_states.push_back(game_state); 
+    game_last_states.push_back(game_state);
     if (game_last_states.size() > 10) {
         game_last_states.erase(game_last_states.begin());
     }
 
     //установка направления движения змейкм
 
-    switch (game_state.snake_direction) { 
+    switch (game_state.snake_direction) {
     case SNAKE_DIRECTION_UP:
         game_state.snake_position_y--;
         if (game_state.snake_position_y < 0) {
@@ -488,12 +514,13 @@ void make_move()
         }
         break;
     }
-    
+
     //если змейка с чем-то провзаимодействовала
 
     if (game_state.field[game_state.snake_position_y][game_state.snake_position_x] != FIELD_CELL_TYPE_NONE) {
         switch (game_state.field[game_state.snake_position_y][game_state.snake_position_x]) {
         case FIELD_CELL_TYPE_APPLE: // случай - яблоко
+            last_score++;
             score++;
             game_state.snake_length++; // увеличение длины на 1
             count_of_apples++; // считаем количество съеденных яблок
@@ -505,7 +532,7 @@ void make_move()
             if (count_of_red_apples == 5) { // если 5 - гененрируем сердечко
                 add_heart();
             }
-            if (score != 0 && score % 15 == 0) { //генерация желтого яблока в млучае, если съедено 15 красных
+            if (score != 0 && score % 15 == 0) { //генерация желтого яблока в случае, если съедено 15 красных
                 add_yellow_apple();
             }
             grow_snake(); // увеличение змейки
@@ -515,7 +542,7 @@ void make_move()
             count_of_red_apples = 0; // подготовка к генерации сердечкка через 5 яблок
             count_of_apples = 0; // установка в 0 отсчета до следующего зеленого яблока
             random_event(); // получение случайной ловушки
-            if (count_of_lives == 0) { 
+            if (count_of_lives == 0 || immortality) {
                 x = 50; y = 185; z = 50; //изменение цвета поля
             }
             break;
@@ -528,41 +555,16 @@ void make_move()
             break;
         case FIELD_CELL_TYPE_HEART: // случай - сердечко
             normal_game(); // восставновление параметров игры
+            if (immortality) {
+                x = r; y = g; z = b;
+            }
             break;
         case FIELD_CELL_TYPE_WALL: //случай - стена
             if (count_of_lives != 0) { //если есть неуязвимость, проверяем, сколько осталось жизней
                 rall_back = true; //откат включен
-                count_of_lives--; // уменьшаем количество жизней
-                switch (count_of_lives) { //меняем фон
-                case 4:
-                    x = 255; y = 20; z = 147;
-                    break;
-                case 3:
-                    x = 255; y = 140; z = 0;
-                    break;
-                case 2:
-                    x = 139; y = 0; z = 139;
-                    break;
-                case 1:
-                    x = 255; y = 255; z = 0;
-                    break;
-                default:
-                    x = r; y = g; z = b;
-                }
-            }
-            else {
-                game_over = true; // иначе конец игры
-            }
-            break;
-        default: // аналогично, если врезались в себя
-            if (game_state.field[game_state.snake_position_y][game_state.snake_position_x] > 1) {
-                if (count_of_lives != 0) {
-                    rall_back = true;
-                    count_of_lives--;
-                    switch (count_of_lives) {
-                    case 5:
-                        x = 0; y = 220; z = 255;
-                        break;
+                if (!immortality) {
+                    count_of_lives--; // уменьшаем количество жизней
+                    switch (count_of_lives) { //меняем фон
                     case 4:
                         x = 255; y = 20; z = 147;
                         break;
@@ -577,6 +579,35 @@ void make_move()
                         break;
                     default:
                         x = r; y = g; z = b;
+                    }
+                }
+            }
+            else {
+                game_over = true;// иначе конец игры
+            }
+            break;
+        default: // аналогично, если врезались в себя
+            if (game_state.field[game_state.snake_position_y][game_state.snake_position_x] > 1) {
+                if (count_of_lives != 0) {
+                    rall_back = true;
+                    if (!immortality) {
+                        count_of_lives--; // уменьшаем количество жизней
+                        switch (count_of_lives) { //меняем фон
+                        case 4:
+                            x = 255; y = 20; z = 147;
+                            break;
+                        case 3:
+                            x = 255; y = 140; z = 0;
+                            break;
+                        case 2:
+                            x = 139; y = 0; z = 139;
+                            break;
+                        case 1:
+                            x = 255; y = 255; z = 0;
+                            break;
+                        default:
+                            x = r; y = g; z = b;
+                        }
                     }
                 }
                 else {
@@ -607,6 +638,17 @@ void start_game() // начало игры
     game_state.snake_length = 4;
     game_state.snake_direction = SNAKE_DIRECTION_RIGHT; // начальное направление - вправо
     score = 0; // счет равен 0
+    last_score = 0;
+    game_over = false;
+    exit_game = false;
+    invert_control = false;
+    event_green = false;
+    count_of_apples = 0;
+    count_of_red_apples = 0;
+    count_of_lives = 0;
+    length_increase = false; 
+    score_decrease = false;
+    immortality = false;
     window_color(); //установка цвета окна
     clear_field(); // очищение поля
 }
@@ -614,17 +656,17 @@ void start_game() // начало игры
 
 //метод управления игрой
 
-void game_control(bool &invert_control,  sf::RenderWindow& window) 
+void game_control(bool& invert_control, sf::RenderWindow& window)
 {
-    sf::Event event; 
+    sf::Event event;
     if (invert_control == false) { // если управление инвертировано
         while (window.pollEvent(event))
         {
-            if (event.type == sf::Event::Closed) 
+            if (event.type == sf::Event::Closed)
                 window.close(); // закрытие окна
 
             if (event.type == sf::Event::KeyPressed) {
-                int snake_direction_last = snake_direction_queue.empty() ? game_state.snake_direction : snake_direction_queue.at(0); 
+                int snake_direction_last = snake_direction_queue.empty() ? game_state.snake_direction : snake_direction_queue.at(0);
                 switch (event.key.code) { // проверка нажатия той или иной клавиши
                 case sf::Keyboard::Up:
                     if (snake_direction_last != SNAKE_DIRECTION_UP && snake_direction_last != SNAKE_DIRECTION_DOWN && type_of_control != 2) { // проверка направления, чтобы не врезаться в себя в обратную 
@@ -636,7 +678,7 @@ void game_control(bool &invert_control,  sf::RenderWindow& window)
                     }
                     break;
                 case sf::Keyboard::Right:
-                    if (snake_direction_last != SNAKE_DIRECTION_RIGHT && snake_direction_last !=  SNAKE_DIRECTION_LEFT && type_of_control != 2) {
+                    if (snake_direction_last != SNAKE_DIRECTION_RIGHT && snake_direction_last != SNAKE_DIRECTION_LEFT && type_of_control != 2) {
                         game_paused = false;
                         if (snake_direction_queue.size() < 2) {
                             snake_direction_queue.insert(snake_direction_queue.begin(), SNAKE_DIRECTION_RIGHT);
@@ -644,7 +686,7 @@ void game_control(bool &invert_control,  sf::RenderWindow& window)
                     }
                     break;
                 case sf::Keyboard::Down:
-                    if (snake_direction_last != SNAKE_DIRECTION_DOWN && snake_direction_last !=  SNAKE_DIRECTION_UP && type_of_control != 2) {
+                    if (snake_direction_last != SNAKE_DIRECTION_DOWN && snake_direction_last != SNAKE_DIRECTION_UP && type_of_control != 2) {
                         game_paused = false;
                         if (snake_direction_queue.size() < 2) {
                             snake_direction_queue.insert(snake_direction_queue.begin(), SNAKE_DIRECTION_DOWN);
@@ -652,7 +694,7 @@ void game_control(bool &invert_control,  sf::RenderWindow& window)
                     }
                     break;
                 case sf::Keyboard::Left:
-                    if (snake_direction_last != SNAKE_DIRECTION_LEFT && snake_direction_last !=  SNAKE_DIRECTION_RIGHT && type_of_control != 2) {
+                    if (snake_direction_last != SNAKE_DIRECTION_LEFT && snake_direction_last != SNAKE_DIRECTION_RIGHT && type_of_control != 2) {
                         game_paused = false;
                         if (snake_direction_queue.size() < 2) {
                             snake_direction_queue.insert(snake_direction_queue.begin(), SNAKE_DIRECTION_LEFT);
@@ -718,7 +760,7 @@ void game_control(bool &invert_control,  sf::RenderWindow& window)
                 int snake_direction_last = snake_direction_queue.empty() ? game_state.snake_direction : snake_direction_queue.at(0);
                 switch (event.key.code) {
                 case sf::Keyboard::Down:
-                    if (snake_direction_last != SNAKE_DIRECTION_UP &&  snake_direction_last !=  SNAKE_DIRECTION_DOWN && type_of_control != 2) {
+                    if (snake_direction_last != SNAKE_DIRECTION_UP && snake_direction_last != SNAKE_DIRECTION_DOWN && type_of_control != 2) {
                         game_paused = false;
                         if (snake_direction_queue.size() < 2) {
                             snake_direction_queue.insert(snake_direction_queue.begin(), SNAKE_DIRECTION_UP);
@@ -726,7 +768,7 @@ void game_control(bool &invert_control,  sf::RenderWindow& window)
                     }
                     break;
                 case sf::Keyboard::Up:
-                    if (snake_direction_last != SNAKE_DIRECTION_DOWN && snake_direction_last !=  SNAKE_DIRECTION_UP && type_of_control != 2) {
+                    if (snake_direction_last != SNAKE_DIRECTION_DOWN && snake_direction_last != SNAKE_DIRECTION_UP && type_of_control != 2) {
                         game_paused = false;
                         if (snake_direction_queue.size() < 2) {
                             snake_direction_queue.insert(snake_direction_queue.begin(), SNAKE_DIRECTION_DOWN);
@@ -734,7 +776,7 @@ void game_control(bool &invert_control,  sf::RenderWindow& window)
                     }
                     break;
                 case sf::Keyboard::Left:
-                    if (snake_direction_last != SNAKE_DIRECTION_RIGHT && snake_direction_last !=  SNAKE_DIRECTION_LEFT && type_of_control != 2) {
+                    if (snake_direction_last != SNAKE_DIRECTION_RIGHT && snake_direction_last != SNAKE_DIRECTION_LEFT && type_of_control != 2) {
                         game_paused = false;
                         if (snake_direction_queue.size() < 2) {
                             snake_direction_queue.insert(snake_direction_queue.begin(), SNAKE_DIRECTION_RIGHT);
@@ -742,7 +784,7 @@ void game_control(bool &invert_control,  sf::RenderWindow& window)
                     }
                     break;
                 case sf::Keyboard::Right:
-                    if (snake_direction_last != SNAKE_DIRECTION_LEFT && snake_direction_last !=  SNAKE_DIRECTION_RIGHT && type_of_control != 2) {
+                    if (snake_direction_last != SNAKE_DIRECTION_LEFT && snake_direction_last != SNAKE_DIRECTION_RIGHT && type_of_control != 2) {
                         game_paused = false;
                         if (snake_direction_queue.size() < 2) {
                             snake_direction_queue.insert(snake_direction_queue.begin(), SNAKE_DIRECTION_LEFT);
@@ -802,60 +844,79 @@ void game_control(bool &invert_control,  sf::RenderWindow& window)
 
 int main(void) // main
 {
+    int restart;
+     
     system("color B0"); // цвет консоли
     setlocale(0, ""); // русский язык
 
+    cout << "Вашему вниманию представлена игра SNAKE" << endl << endl;
+
     srand(time(NULL)); //рандомизация
+    while (!exit_game) {
+        start_game(); // начало игры
 
-    speed = difficulty_level(); // уровень сложности
-    speed_last = speed; // скорость по умолчанию
+        speed = difficulty_level(); // уровень сложности
+        speed_last = speed; // скорость по умолчанию
 
-    start_game(); // начало игры
+        sf::RenderWindow window(sf::VideoMode(window_width, window_height), "snake", sf::Style::Close); // открытие окна
 
-    sf::RenderWindow window(sf::VideoMode(window_width, window_height), "snake", sf::Style::Close); // открытие окна
+        while (window.isOpen()) { // пока окно открыто
+            game_control(invert_control, window); // подключение управления
 
-    while (window.isOpen()){ // пока окно открыто
-        game_control(invert_control, window); // подключение управления
-
-        if (!snake_direction_queue.empty()) { // буферизация управления
-            game_state.snake_direction = snake_direction_queue.back();
-            snake_direction_queue.pop_back();
-        }
-
-        if (!game_paused) { //если не пауза
-            if (!rall_back) { // если не откат
-                make_move(); //обновляем поле
+            if (!snake_direction_queue.empty()) { // буферизация управления
+                game_state.snake_direction = snake_direction_queue.back();
+                snake_direction_queue.pop_back();
             }
-            else {
-                if (!game_last_states.empty()) { //откат
-                    game_state = game_last_states.back();
-                    game_last_states.pop_back();
+
+            if (!game_paused) { //если не пауза
+                if (!rall_back) { // если не откат
+                    make_move(); //обновляем поле
                 }
                 else {
-                    rall_back = false; // выключение отката
+                    if (!game_last_states.empty()) { //откат
+                        game_state = game_last_states.back();
+                        game_last_states.pop_back();
+                    }
+                    else {
+                        rall_back = false; // выключение отката
+                    }
                 }
             }
-        }
 
-        if (game_over) { // если не откат и конец игры
-            if (!rall_back) {
-                sf::sleep(sf::seconds(1)); // задержка на 1 секунду
-                window.close(); // хакрытие окна
-                cout << "It's GAMEOVER!" << endl;
-                cout << endl << "Your score: " << score << endl << endl;
+            if (game_over) { // если не откат и конец игры
+                if (!rall_back) {
+                    sf::sleep(sf::seconds(1)); // задержка на 1 секунду
+                    window.close(); // хакрытие окна
+                    cout << "It's GAMEOVER!" << endl;
+                    cout << endl << "Your score: " << score << endl << endl;
+                }
             }
+
+
+            window.clear(sf::Color(x, y, z)); //цвет поля
+            draw_field(window); // отрисовка поля
+
+            window.display(); // вывод окна
+
+            sf::sleep(sf::milliseconds(speed)); // скорость
         }
 
+        cout << "Выберите одно из следующих действий: \n\t0 - exit\n\t1 - restart" << endl;;
+        cout << "\nВыберите действие: "; cin >> restart;
 
-        window.clear(sf::Color(x, y, z)); //цвет поля
-        draw_field(window); // отрисовка поля
-
-        window.display(); // вывод окна
-
-        sf::sleep(sf::milliseconds(speed)); // скорость
+        if (restart == 1) {
+            system("cls");
+            cout << "Вы начали новую игру.\nВаш предыдущий счет: " << score << endl;
+            cout << endl;
+            continue;
         }
-    
+        else {
+            exit_game = true;
+        }
+    }
+
+    cout << endl;
     system("pause"); // удержание консоли
-
+    
     return 0;
 }
