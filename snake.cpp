@@ -917,6 +917,7 @@ int main(void) // main
     }
 
     cout << endl;
+    cout << "Good bye!\n" << endl; // вывод прощального сообщения
     system("pause"); // удержание консоли
     
     return 0;
