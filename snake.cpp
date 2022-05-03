@@ -335,7 +335,7 @@ void choose_skin()
 
 int difficulty_level()
 {
-    int snake_speed, level; //переменные для определения скорости
+    int snake_speed = 120, level; //переменные для определения скорости
 
     //вывод информации
 
