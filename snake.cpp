@@ -9,6 +9,19 @@ using namespace std; //стандартное пространство имен
 
 //Блок константных выражений для стандартных элементов на поле
 
+const int skin_cell_size = 32;
+const int skin_length = 2;
+const int skin_count = 4;
+const int skin_choice_height = (skin_length + 4) * skin_cell_size;
+const int skin_choice_width = (skin_count + 5) * skin_cell_size;
+int choice = 1;
+
+const int field_color_cell_size = 32;
+const int window_color_height = 256;
+const int window_color_width = 256;
+bool pause = false;
+int color = 1;
+
 constexpr auto FIELD_CELL_TYPE_NONE = 0; //пустая клетка
 constexpr auto FIELD_CELL_TYPE_APPLE = -1; //яблоко
 constexpr auto FIELD_CELL_TYPE_WALL = -2; //стена
@@ -52,7 +65,7 @@ int x, y, z, r, g, b; //цвет поля
 int count_of_lives = 0; //количество жизней при неуязвимости
 bool exit_game; // переменная, отвечающая за выход
 bool immortality = false; // переменная, отвечающая за бессмертие
-int skeen;
+int skin;
 string code; // вводимый код
 string immortality_code = "2603_Alekseev_I_I_2219"; //код бессмертия
 
@@ -70,7 +83,255 @@ GameState game_state; //текущая стадия игры
 vector <GameState> game_last_states; //массив с сохранением стадии для отката назад
 bool rall_back = false; //откат назад
 
-//метод, отвечающий за задание уровня скорости, способа управления, вывод инструкции и отображение загруузки
+void draw_window_color(sf::RenderWindow& window_2)
+{
+    sf::Texture none_texture;
+    sf::Sprite none;
+
+    none_texture.loadFromFile("images/none.png");
+    none.setTexture(none_texture);
+
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            none.setPosition(float(j * field_color_cell_size), float(i * field_color_cell_size));
+            window_2.draw(none);
+        }
+    }
+}
+
+void chose_window_color(sf::RenderWindow& window_2) //выбор цвета фона
+{
+    sf::Event event;
+
+    while (window_2.pollEvent(event))
+    {
+        if (event.type == sf::Event::KeyPressed) {
+            switch (event.key.code) {
+            case sf::Keyboard::Up:
+                if (color != 3) {
+                    color++;
+                }
+                else {
+                    color = 1;
+                }
+                switch (color) {
+                case 2:
+                    x = 152; y = 251; z = 152;
+                    pause = false;
+                    window_2.clear(sf::Color(x, y, z));
+                    r = x; g = y; b = z;
+                    break;
+                case 3:
+                    x = 0; y = 255; z = 153;
+                    pause = false;
+                    window_2.clear(sf::Color(x, y, z));
+                    r = x; g = y; b = z;
+                    break;
+                default:
+                    x = 127; y = 255; z = 212;
+                    pause = false;
+                    window_2.clear(sf::Color(x, y, z));
+                    r = x; g = y; b = z;
+                }
+                break;
+
+            case sf::Keyboard::Down:
+                if (color != 1) {
+                    color--;
+                }
+                else {
+                    color = 3;
+                }
+                switch (color) {
+                case 2:
+                    x = 152; y = 251; z = 152;
+                    pause = false;
+                    window_2.clear(sf::Color(x, y, z));
+                    r = x; g = y; b = z;
+                    break;
+                case 3:
+                    x = 0; y = 255; z = 153;
+                    pause = false;
+                    window_2.clear(sf::Color(x, y, z));
+                    r = x; g = y; b = z;
+                    break;
+                default:
+                    x = 127; y = 255; z = 212;
+                    pause = false;
+                    window_2.clear(sf::Color(x, y, z));
+                    r = x; g = y; b = z;
+                }
+                break;
+
+
+            case sf::Keyboard::Enter:
+                window_2.close();
+                break;
+            }
+
+        }
+    }
+}
+
+
+void set_window_color()
+{
+    sf::RenderWindow window_2(sf::VideoMode(window_color_width, window_color_height), "Snake", sf::Style::Close); // открытие окна
+    window_2.clear(sf::Color(x, y, z));
+
+    while (window_2.isOpen()) {
+
+        chose_window_color(window_2);
+
+        if (!pause) {
+            draw_window_color(window_2);
+            window_2.display();
+            pause = true;
+        }
+    }
+}
+
+
+void chek_event(sf::RenderWindow& window_1)
+{
+    sf::Event event;
+    while (window_1.pollEvent(event))
+    {
+        if (event.type == sf::Event::KeyPressed) {
+            switch (event.key.code) { // проверка нажатия той или иной клавиши
+            case sf::Keyboard::Right:
+                if (choice != 7) {
+                    choice += 2;
+                }
+                else {
+                    choice = 1;
+                }
+                break;
+
+            case sf::Keyboard::Left:
+                if (choice != 1) {
+                    choice -= 2;
+                }
+                break;
+            case sf::Keyboard::Enter:
+                switch (choice) {
+                case 1:
+                    skin = 0;
+                    break;
+                case 3:
+                    skin = 1;
+                    break;
+                case 5:
+                    skin = 2;
+                    break;
+                case 7:
+                    skin = 3;
+                    break;
+                }
+                window_1.close();
+                break;
+            }
+        }
+    }
+}
+
+void draw_arrow(sf::RenderWindow& window_1)
+{
+    sf::Texture arrow_texture;
+    sf::Sprite arrow;
+    arrow_texture.loadFromFile("images/arrow.png");
+    arrow.setTexture(arrow_texture);
+    arrow.setPosition(float(choice * skin_cell_size), float(5 * skin_cell_size));
+    window_1.draw(arrow);
+}
+
+void draw_skeen_choice(sf::RenderWindow& window_1)
+{
+    sf::Texture skin_texture;
+    sf::Sprite skin;
+    for (int i = 0; i < skin_length + 5; i++) {
+        for (int j = 0; j < skin_count + 4; j++) {
+            switch (i) {
+            case 1:
+                switch (j) {
+                case 1:
+                    skin_texture.loadFromFile("images/head.png");
+                    skin.setTexture(skin_texture);
+                    skin.setPosition(float(j * skin_cell_size), float(i * skin_cell_size));
+                    window_1.draw(skin);
+                    break;
+                case 3:
+                    skin_texture.loadFromFile("images/head_1.png");
+                    skin.setTexture(skin_texture);
+                    skin.setPosition(float(j * skin_cell_size), float(i * skin_cell_size));
+                    window_1.draw(skin);
+                    break;
+                case 5:
+                    skin_texture.loadFromFile("images/head_2.png");
+                    skin.setTexture(skin_texture);
+                    skin.setPosition(float(j * skin_cell_size), float(i * skin_cell_size));
+                    window_1.draw(skin);
+                    break;
+                case 7:
+                    skin_texture.loadFromFile("images/head_3.png");
+                    skin.setTexture(skin_texture);
+                    skin.setPosition(float(j * skin_cell_size), float(i * skin_cell_size));
+                    window_1.draw(skin);
+                    break;
+                }
+                break;
+            default:
+                if (i != 0 && i != 5) {
+                    switch (j) {
+                    case 1:
+                        skin_texture.loadFromFile("images/snake.png");
+                        skin.setTexture(skin_texture);
+                        skin.setPosition(float(j * skin_cell_size), float(i * skin_cell_size));
+                        window_1.draw(skin);
+                        break;
+                    case 3:
+                        skin_texture.loadFromFile("images/snake_1.png");
+                        skin.setTexture(skin_texture);
+                        skin.setPosition(float(j * skin_cell_size), float(i * skin_cell_size));
+                        window_1.draw(skin);
+                        break;
+                    case 5:
+                        skin_texture.loadFromFile("images/snake_2.png");
+                        skin.setTexture(skin_texture);
+                        skin.setPosition(float(j * skin_cell_size), float(i * skin_cell_size));
+                        window_1.draw(skin);
+                        break;
+                    case 7:
+                        skin_texture.loadFromFile("images/snake_3.png");
+                        skin.setTexture(skin_texture);
+                        skin.setPosition(float(j * skin_cell_size), float(i * skin_cell_size));
+                        window_1.draw(skin);
+                        break;
+                    }
+                }
+            }
+
+        }
+    }
+    draw_arrow(window_1);
+}
+
+void choose_skin()
+{
+    sf::RenderWindow window_1(sf::VideoMode(skin_choice_width, skin_choice_height), "Snake", sf::Style::Close); // открытие окна
+    while (window_1.isOpen()) {
+
+        draw_skeen_choice(window_1);
+
+        window_1.display();
+        sf::sleep(sf::milliseconds(100));
+        window_1.clear(sf::Color(255, 255, 255));
+
+        chek_event(window_1);
+    }
+}
+
+//метод, отвечающий за задание уровня скорости, способа управления, вывод инструкции и отображение загрузки
 
 int difficulty_level()
 {
@@ -96,7 +357,12 @@ int difficulty_level()
         cout << endl << "Выберите тип управления: "; cin >> type_of_control; cout << endl; //повторный запрос типа управления
     }
 
-    cout << "Выберите скин: "; cin >> skeen;
+    cout << "Выберите змейку, за которую будете играть!(Для навигации испольуйте курсоры влево и вправо, для выбора нажмите enter)" << endl;
+    choose_skin();
+    cout << endl;
+
+    cout << "Выберите цвет поля!(Для навигации используйте курсоры вверх и вниз, для выбора нажмите enter)" << endl << endl;
+    set_window_color();
 
     cout << "Чтобы поставить игру на паузу - нажмите пробел, для продолжения используйте клавиши управления или enter" << endl;
     cout << "Будьте внимательны! В игре есть 3 типа яблок. Зеленые яблоки появляются после съеденных 10 красных, желтые после 15." << endl;
@@ -158,29 +424,6 @@ int difficulty_level()
     return snake_speed; // возврат в main установленного значения
 }
 
-void window_color() //выбор цвета фона
-{
-    int color;
-    cout << "Доступные стили поля: " << endl; // информация для пользователя
-    cout << "\t1 - standart\n\t2 - green\n\t3 - mint" << endl;
-    cout << endl << "Выберите стиль: "; cin >> color;
-    cin.clear(); cin.ignore(); //очищение потока ввода
-    cout << endl;
-    switch (color) {
-    case 2:
-        x = 152; y = 251; z = 152; //установка цвета поля
-        r = x; g = y; b = z; //переменные, необходимые,чтобы запомнить установленный изначально цвет
-        break;
-    case 3:
-        x = 0; y = 255; z = 153;
-        r = x; g = y; b = z;
-        break;
-    default:
-        x = 127; y = 255; z = 212;
-        r = x; g = y; b = z;
-        break;
-    }
-}
 
 //метод определения случайной пустой клетки для генерации яблок
 
@@ -295,7 +538,7 @@ void draw_field(sf::RenderWindow& window)
     sf::Texture snake_head_texture; //текстура головы змйки  
     sf::Sprite snake_head; //спрайт
 
-    switch (skeen) {
+    switch (skin) {
     case 1:
         snake_texture.loadFromFile("images/snake_1.png"); //загрузка элеимента змейки
         snake.setTexture(snake_texture); //установка текстуры
@@ -668,6 +911,7 @@ void start_game() // начало игры
     game_state.snake_length = 4; // длина по умолчанию
     game_state.snake_direction = SNAKE_DIRECTION_RIGHT; // начальное направление - вправо
     score = 0; // счет равен 0
+    choice = 1;
     last_score = 0; //обновление предыдущего счета
     game_over = false; // обновление значения конца игры
     exit_game = false; //обновление значения выхода из игры
@@ -679,7 +923,10 @@ void start_game() // начало игры
     length_increase = false;  //значение по умолчанию для увеличения длины
     score_decrease = false; //значение по умолчанию для уменьшения длины
     immortality = false; // значение по умолчанию для бессмертия
-    window_color(); //установка цвета окна
+    x = 157, y = 255, z = 212;
+    r = x, g = y, b = z;
+    pause = false;
+    color = 1;
     clear_field(); // очищение поля
 }
 
@@ -915,13 +1162,13 @@ int main(void) // main
 
             if (game_over) { // если не откат и конец игры
                 if (!rall_back) {
-                    sf::sleep(sf::seconds(1)); // задержка на 1 секунду
+                    window.clear(sf::Color(255, 0, 0));                   
+                    sf::sleep(sf::seconds(1)); // задержка на 1 секунду                   
                     window.close(); // закрытие окна
                     cout << "It's GAMEOVER!" << endl; //вывод сообщеничя о конце игры 
                     cout << endl << "Your score: " << score << endl << endl; //вывод результата
                 }
             }
-
 
             window.clear(sf::Color(x, y, z)); //цвет поля
             draw_field(window); // отрисовка поля
