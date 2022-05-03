@@ -52,6 +52,7 @@ int x, y, z, r, g, b; //цвет поля
 int count_of_lives = 0; //количество жизней при неуязвимости
 bool exit_game; // переменная, отвечающая за выход
 bool immortality = false; // переменная, отвечающая за бессмертие
+int skeen;
 string code; // вводимый код
 string immortality_code = "2603_Alekseev_I_I_2219"; //код бессмертия
 
@@ -94,6 +95,9 @@ int difficulty_level()
         
         cout << endl << "Выберите тип управления: "; cin >> type_of_control; cout << endl; //повторный запрос типа управления
     }
+
+    cout << "Выберите скин: "; cin >> skeen;
+
     cout << "Чтобы поставить игру на паузу - нажмите пробел, для продолжения используйте клавиши управления или enter" << endl;
     cout << "Будьте внимательны! В игре есть 3 типа яблок. Зеленые яблоки появляются после съеденных 10 красных, желтые после 15." << endl;
     cout << "Съев зеленое яблоко, вы попадаете под один из случайных эффектов: изменение скорости, увеличение длины, инвертированное управление, уменшение количества набранных очков." << endl;
@@ -283,16 +287,43 @@ void draw_field(sf::RenderWindow& window)
     none_texture.loadFromFile("images/none.png"); //загрузка изображения пустой клетки
     sf::Sprite none; //спрайт пустой клетки
     none.setTexture(none_texture); //установка текстуры
-
+    
+    // skeens
     sf::Texture snake_texture; //текстура змейки
-    snake_texture.loadFromFile("images/snake.png"); //загрузка элеимента змейки
     sf::Sprite snake; // спрайт
-    snake.setTexture(snake_texture); //установка текстуры
 
     sf::Texture snake_head_texture; //текстура головы змйки  
-    snake_head_texture.loadFromFile("images/head.png"); //загрузка ищображения
     sf::Sprite snake_head; //спрайт
-    snake_head.setTexture(snake_head_texture); //установка текстуры
+
+    switch (skeen) {
+    case 1:
+        snake_texture.loadFromFile("images/snake_1.png"); //загрузка элеимента змейки
+        snake.setTexture(snake_texture); //установка текстуры
+
+        snake_head_texture.loadFromFile("images/head_1.png"); //загрузка ищображения
+        snake_head.setTexture(snake_head_texture); //установка текстуры
+        break;
+    case 2:
+        snake_texture.loadFromFile("images/snake_2.png"); //загрузка элеимента змейки
+        snake.setTexture(snake_texture); //установка текстуры
+
+        snake_head_texture.loadFromFile("images/head_2.png"); //загрузка ищображения
+        snake_head.setTexture(snake_head_texture); //установка текстуры
+        break;
+    case 3:
+        snake_texture.loadFromFile("images/snake_3.png"); //загрузка элеимента змейки
+        snake.setTexture(snake_texture); //установка текстуры
+
+        snake_head_texture.loadFromFile("images/head_3.png"); //загрузка ищображения
+        snake_head.setTexture(snake_head_texture); //установка текстуры
+        break;
+    default:
+        snake_texture.loadFromFile("images/snake.png"); //загрузка элеимента змейки
+        snake.setTexture(snake_texture); //установка текстуры
+
+        snake_head_texture.loadFromFile("images/head.png"); //загрузка ищображения
+        snake_head.setTexture(snake_head_texture); //установка текстуры
+    }
 
     sf::Texture apple_texture; //текстура красного яблока
     apple_texture.loadFromFile("images/apple.png"); //загрузка изображения
