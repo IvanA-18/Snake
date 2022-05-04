@@ -11,10 +11,19 @@ using namespace std; //стандартное пространство имен
 
 const int skin_cell_size = 32;
 const int skin_length = 2;
-const int skin_count = 4;
+const int skin_count = 5; // количество скинов
 const int skin_choice_height = (skin_length + 4) * skin_cell_size;
-const int skin_choice_width = (skin_count + 5) * skin_cell_size;
+const int skin_choice_width = (skin_count + 6) * skin_cell_size;
 int choice = 1;
+int skin;
+
+const int wall_cell_size = 32;
+const int wall_length = 2;
+const int wall_count = 3; // количество скинов
+const int wall_choice_height = (wall_length + 3) * wall_cell_size;
+const int wall_choice_width = (wall_count + 4) * wall_cell_size;
+int choice_wall = 1;
+int wall;
 
 const int field_color_cell_size = 32;
 const int window_color_height = 256;
@@ -65,7 +74,6 @@ int x, y, z, r, g, b; //цвет поля
 int count_of_lives = 0; //количество жизней при неуязвимости
 bool exit_game; // переменная, отвечающая за выход
 bool immortality = false; // переменная, отвечающая за бессмертие
-int skin;
 string code; // вводимый код
 string immortality_code = "2603_Alekseev_I_I_2219"; //код бессмертия
 
@@ -108,7 +116,7 @@ void chose_window_color(sf::RenderWindow& window_2) //выбор цвета фо
         if (event.type == sf::Event::KeyPressed) {
             switch (event.key.code) {
             case sf::Keyboard::Up:
-                if (color != 3) {
+                if (color != 7) {
                     color++;
                 }
                 else {
@@ -127,6 +135,30 @@ void chose_window_color(sf::RenderWindow& window_2) //выбор цвета фо
                     window_2.clear(sf::Color(x, y, z));
                     r = x; g = y; b = z;
                     break;
+                case 4:
+                    x = 147; y = 112; z = 219;
+                    pause = false;
+                    window_2.clear(sf::Color(x, y, z));
+                    r = x; g = y; b = z;
+                    break;
+                case 5:
+                    x = 240; y = 128; z = 128;
+                    pause = false;
+                    window_2.clear(sf::Color(x, y, z));
+                    r = x; g = y; b = z;
+                    break;
+                case 6:
+                    x = 240; y = 230; z = 140;
+                    pause = false;
+                    window_2.clear(sf::Color(x, y, z));
+                    r = x; g = y; b = z;
+                    break;
+                case 7:
+                    x = 60; y = 179; z = 113;
+                    pause = false;
+                    window_2.clear(sf::Color(x, y, z));
+                    r = x; g = y; b = z;
+                    break;
                 default:
                     x = 127; y = 255; z = 212;
                     pause = false;
@@ -140,7 +172,7 @@ void chose_window_color(sf::RenderWindow& window_2) //выбор цвета фо
                     color--;
                 }
                 else {
-                    color = 3;
+                    color = 7;
                 }
                 switch (color) {
                 case 2:
@@ -151,6 +183,30 @@ void chose_window_color(sf::RenderWindow& window_2) //выбор цвета фо
                     break;
                 case 3:
                     x = 0; y = 255; z = 153;
+                    pause = false;
+                    window_2.clear(sf::Color(x, y, z));
+                    r = x; g = y; b = z;
+                    break;
+                case 4:
+                    x = 147; y = 112; z = 219;
+                    pause = false;
+                    window_2.clear(sf::Color(x, y, z));
+                    r = x; g = y; b = z;
+                    break;
+                case 5:
+                    x = 240; y = 128; z = 128;
+                    pause = false;
+                    window_2.clear(sf::Color(x, y, z));
+                    r = x; g = y; b = z;
+                    break;
+                case 6:
+                    x = 240; y = 230; z = 140;
+                    pause = false;
+                    window_2.clear(sf::Color(x, y, z));
+                    r = x; g = y; b = z;
+                    break;
+                case 7:
+                    x = 60; y = 179; z = 113;
                     pause = false;
                     window_2.clear(sf::Color(x, y, z));
                     r = x; g = y; b = z;
@@ -176,7 +232,7 @@ void chose_window_color(sf::RenderWindow& window_2) //выбор цвета фо
 
 void set_window_color()
 {
-    sf::RenderWindow window_2(sf::VideoMode(window_color_width, window_color_height), "Snake", sf::Style::Close); // открытие окна
+    sf::RenderWindow window_2(sf::VideoMode(window_color_width, window_color_height), "Field", sf::Style::Close); // открытие окна
     window_2.clear(sf::Color(x, y, z));
 
     while (window_2.isOpen()) {
@@ -191,16 +247,116 @@ void set_window_color()
     }
 }
 
+void check_event_2(sf::RenderWindow& window_wall)
+{
+    sf::Event event;
+    while (window_wall.pollEvent(event))
+    {
+        if (event.type == sf::Event::KeyPressed) {
+            switch (event.key.code) {
+            case sf::Keyboard::Right:
+                if (choice_wall != 5) { //изменение количества выборов скина
+                    choice_wall += 2;
+                }
+                else {
+                    choice_wall = 1;
+                }
+                break;
 
-void chek_event(sf::RenderWindow& window_1)
+            case sf::Keyboard::Left:
+                if (choice_wall != 1) {
+                    choice_wall -= 2;
+                }
+                break;
+            case sf::Keyboard::Enter:
+                switch (choice_wall) {
+                case 1:
+                    wall = 0;
+                    window_wall.close();
+                    break;
+                case 3:
+                    wall = 1;
+                    window_wall.close();
+                    break;
+                case 5:
+                    wall = 2;
+                    window_wall.close();
+                    break;
+                }
+            }
+        }
+    }
+}
+
+void draw_arrow_2(sf::RenderWindow& window_wall)
+{
+    sf::Texture arrow_texture_2;
+    sf::Sprite arrow_2;
+    arrow_texture_2.loadFromFile("images/arrow_2.png");
+    arrow_2.setTexture(arrow_texture_2);
+    arrow_2.setPosition(float(choice_wall * wall_cell_size), float(4 * wall_cell_size));
+    window_wall.draw(arrow_2);
+}
+
+void draw_wall_choice(sf::RenderWindow& window_wall)
+{
+    sf::Texture wall_texture;
+    sf::Sprite wall;
+    for (int i = 0; i < skin_length + 2; i++) {
+        for (int j = 0; j < skin_count + 5; j++) {
+                if (i != 0 && i != 5) {
+                    switch (j) {
+                    case 1:
+                        wall_texture.loadFromFile("images/wall.png");
+                        wall.setTexture(wall_texture);
+                        wall.setPosition(float(j * wall_cell_size), float(i * wall_cell_size));
+                        window_wall.draw(wall);
+                        break;
+                    case 3:
+                        wall_texture.loadFromFile("images/wall_2.png");
+                        wall.setTexture(wall_texture);
+                        wall.setPosition(float(j * wall_cell_size), float(i * wall_cell_size));
+                        window_wall.draw(wall);
+                        break;
+                    case 5:
+                        wall_texture.loadFromFile("images/wall_3.png");
+                        wall.setTexture(wall_texture);
+                        wall.setPosition(float(j * wall_cell_size), float(i * wall_cell_size));
+                        window_wall.draw(wall);
+                        break;
+                }
+            }
+
+        }
+    }
+    draw_arrow_2(window_wall);
+}
+
+void choose_wall()
+{
+    sf::RenderWindow window_wall(sf::VideoMode(wall_choice_width, wall_choice_height), "Wall", sf::Style::Close); // открытие окна
+    while (window_wall.isOpen()) {
+        window_wall.clear(sf::Color(0, 250, 154));
+
+        draw_wall_choice(window_wall);
+
+        window_wall.display();
+        sf::sleep(sf::milliseconds(100));
+        window_wall.clear(sf::Color(255, 255, 255));
+
+        check_event_2(window_wall);
+    }
+}
+
+void check_event(sf::RenderWindow& window_1)
 {
     sf::Event event;
     while (window_1.pollEvent(event))
     {
         if (event.type == sf::Event::KeyPressed) {
-            switch (event.key.code) { // проверка нажатия той или иной клавиши
+            switch (event.key.code) { 
             case sf::Keyboard::Right:
-                if (choice != 7) {
+                if (choice != 9) { //изменение количества выборов скина
                     choice += 2;
                 }
                 else {
@@ -227,6 +383,9 @@ void chek_event(sf::RenderWindow& window_1)
                 case 7:
                     skin = 3;
                     break;
+                case 9:
+                    skin = 4;
+                    break;
                 }
                 window_1.close();
                 break;
@@ -245,12 +404,12 @@ void draw_arrow(sf::RenderWindow& window_1)
     window_1.draw(arrow);
 }
 
-void draw_skeen_choice(sf::RenderWindow& window_1)
+void draw_skin_choice(sf::RenderWindow& window_1)
 {
     sf::Texture skin_texture;
     sf::Sprite skin;
     for (int i = 0; i < skin_length + 5; i++) {
-        for (int j = 0; j < skin_count + 4; j++) {
+        for (int j = 0; j < skin_count + 5; j++) {
             switch (i) {
             case 1:
                 switch (j) {
@@ -274,6 +433,12 @@ void draw_skeen_choice(sf::RenderWindow& window_1)
                     break;
                 case 7:
                     skin_texture.loadFromFile("images/head_3.png");
+                    skin.setTexture(skin_texture);
+                    skin.setPosition(float(j * skin_cell_size), float(i * skin_cell_size));
+                    window_1.draw(skin);
+                    break;
+                case 9:
+                    skin_texture.loadFromFile("images/head_4.png");
                     skin.setTexture(skin_texture);
                     skin.setPosition(float(j * skin_cell_size), float(i * skin_cell_size));
                     window_1.draw(skin);
@@ -307,6 +472,12 @@ void draw_skeen_choice(sf::RenderWindow& window_1)
                         skin.setPosition(float(j * skin_cell_size), float(i * skin_cell_size));
                         window_1.draw(skin);
                         break;
+                    case 9:
+                        skin_texture.loadFromFile("images/snake_4.png");
+                        skin.setTexture(skin_texture);
+                        skin.setPosition(float(j * skin_cell_size), float(i * skin_cell_size));
+                        window_1.draw(skin);
+                        break;
                     }
                 }
             }
@@ -318,16 +489,17 @@ void draw_skeen_choice(sf::RenderWindow& window_1)
 
 void choose_skin()
 {
-    sf::RenderWindow window_1(sf::VideoMode(skin_choice_width, skin_choice_height), "Snake", sf::Style::Close); // открытие окна
+    sf::RenderWindow window_1(sf::VideoMode(skin_choice_width, skin_choice_height), "Snake_skin", sf::Style::Close); // открытие окна
     while (window_1.isOpen()) {
+        window_1.clear(sf::Color(176, 224, 230));
 
-        draw_skeen_choice(window_1);
+        draw_skin_choice(window_1);
 
         window_1.display();
         sf::sleep(sf::milliseconds(100));
         window_1.clear(sf::Color(255, 255, 255));
 
-        chek_event(window_1);
+        check_event(window_1);
     }
 }
 
@@ -363,6 +535,9 @@ int difficulty_level()
 
     cout << "Выберите цвет поля!(Для навигации используйте курсоры вверх и вниз, для выбора нажмите enter)" << endl << endl;
     set_window_color();
+
+    cout << "Выберите тип стены!(Для навигации используйте курсоры вправо и влево, для выбора нажмите enter)" << endl << endl;
+    choose_wall();
 
     cout << "Чтобы поставить игру на паузу - нажмите пробел, для продолжения используйте клавиши управления или enter" << endl;
     cout << "Будьте внимательны! В игре есть 3 типа яблок. Зеленые яблоки появляются после съеденных 10 красных, желтые после 15." << endl;
@@ -560,6 +735,13 @@ void draw_field(sf::RenderWindow& window)
         snake_head_texture.loadFromFile("images/head_3.png"); //загрузка ищображения
         snake_head.setTexture(snake_head_texture); //установка текстуры
         break;
+    case 4:
+        snake_texture.loadFromFile("images/snake_4.png"); //загрузка элеимента змейки
+        snake.setTexture(snake_texture); //установка текстуры
+
+        snake_head_texture.loadFromFile("images/head_4.png"); //загрузка ищображения
+        snake_head.setTexture(snake_head_texture); //установка текстуры
+        break;
     default:
         snake_texture.loadFromFile("images/snake.png"); //загрузка элеимента змейки
         snake.setTexture(snake_texture); //установка текстуры
@@ -583,8 +765,18 @@ void draw_field(sf::RenderWindow& window)
     sf::Sprite apple_yellow; //спрайт
     apple_yellow.setTexture(apple_yellow_texture); //установка текстуры
 
-    sf::Texture wall_texture; //текстура стены
-    wall_texture.loadFromFile("images/wall.png"); //загрузка изображения
+    sf::Texture wall_texture; //текстура стены // // // // // // 
+    switch (wall) {
+    case 1:
+        wall_texture.loadFromFile("images/wall_2.png"); //загрузка изображения
+        break;
+    case 2:
+        wall_texture.loadFromFile("images/wall_3.png"); //загрузка изображения
+        break;
+    default:
+        wall_texture.loadFromFile("images/wall.png");
+    }
+    
     sf::Sprite wall; //спрайт
     wall.setTexture(wall_texture); //установка текстуры
 
@@ -848,7 +1040,7 @@ void make_move()
                         x = 139; y = 0; z = 139;
                         break;
                     case 1:
-                        x = 255; y = 255; z = 0;
+                        x = 255; y = 215; z = 0;
                         break;
                     default:
                         x = r; y = g; z = b;
@@ -927,6 +1119,7 @@ void start_game() // начало игры
     r = x, g = y, b = z;
     pause = false;
     color = 1;
+    choice_wall = 1;
     clear_field(); // очищение поля
 }
 
