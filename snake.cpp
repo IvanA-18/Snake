@@ -5,6 +5,8 @@
 #include <windows.h> 
 #include <string>
 
+HANDLE hConsole;
+
 using namespace std; //стандартное пространство имен
 
 //Блок константных выражений для стандартных элементов на поле
@@ -74,6 +76,7 @@ int x, y, z, r, g, b; //цвет поля
 int count_of_lives = 0; //количество жизней при неуязвимости
 bool exit_game; // переменная, отвечающая за выход
 bool immortality = false; // переменная, отвечающая за бессмертие
+bool win_game = false;
 string code; // вводимый код
 string immortality_code = "2603_Alekseev_I_I_2219"; //код бессмертия
 
@@ -515,15 +518,23 @@ int difficulty_level()
     cout << endl << "Выберите тип управления: "; cin >> type_of_control; cout << endl; //запрос типа управления
     if (type_of_control == 3) { // дополнение в виде запроса кода бессмертия
         cout << "Введите код бессмертия: "; // запрос кода
+        SetConsoleTextAttribute(hConsole, (WORD)((14 << 4) | 14));
         cin.clear(); cin.ignore(); //очищение потока ввода
         getline(cin, code); //ввод кода
+        SetConsoleTextAttribute(hConsole, (WORD)((11 << 4) | 0));
         if (code == immortality_code) { //проверка на корректность
             immortality = true; //если код верный - активация бессмертия
             count_of_lives = 1; //установка постоянной 1 жизни
+            cout << endl;
+            SetConsoleTextAttribute(hConsole, (WORD)((10 << 4) | 0));
             cout << "Code is correct!" << endl; //вывод сообщения
+            SetConsoleTextAttribute(hConsole, (WORD)((11 << 4) | 0));
         }
         else {
+            cout << endl;
+            SetConsoleTextAttribute(hConsole, (WORD)((14 << 4) | 4));
             cout << "Invalid code!" << endl; //сообщение в случае неверного кода
+            SetConsoleTextAttribute(hConsole, (WORD)((11 << 4) | 0));
         }
         
         cout << endl << "Выберите тип управления: "; cin >> type_of_control; cout << endl; //повторный запрос типа управления
@@ -613,6 +624,10 @@ int get_random_empty_cell()
         }
     }
 
+    if (empty_cell_count == 0) {
+        empty_cell_count = 1;
+    }
+
     int target_empty_cell_index = rand() % empty_cell_count;
     int empty_cell_index = 0;
 
@@ -628,7 +643,8 @@ int get_random_empty_cell()
             }
         }
     }
-    return -1; // не осталсь пустых клеток
+     // не осталсь пустых клеток
+    return -1;
 }
 
 //методы получения предметов на поле
@@ -666,6 +682,8 @@ void add_green_apple() //зеленое аналогично
     }
 }
 
+
+
 //метод очищения поля для генерации стен, первого зеленого и красного яблока, пустых клеток, змейки на анчальной позиции
 
 void clear_field()
@@ -680,16 +698,16 @@ void clear_field()
         game_state.field[game_state.snake_position_y][game_state.snake_position_x - i] = game_state.snake_length - i;
 
     for (int i = 0; i < field_size_x; i++) {
-        if (i < 10 || field_size_x - i - 1 < 10) {
-            game_state.field[0][i] = FIELD_CELL_TYPE_WALL;
-            game_state.field[field_size_y - 1][i] = FIELD_CELL_TYPE_WALL; //генерация горизонтальных стен
-        }
+       if (i < 10 || field_size_x - i - 1 < 10) {
+           game_state.field[0][i] = FIELD_CELL_TYPE_WALL;
+           game_state.field[field_size_y - 1][i] = FIELD_CELL_TYPE_WALL; //генерация горизонтальных стен
+       }
     }
 
     for (int j = 1; j < field_size_y - 1; j++) {
         if (j < 8 || field_size_y - j - 1 < 8) {
-            game_state.field[j][0] = FIELD_CELL_TYPE_WALL; // генерация уголка
-            game_state.field[j][field_size_x - 1] = FIELD_CELL_TYPE_WALL; // генерация вертикальных стен
+           game_state.field[j][0] = FIELD_CELL_TYPE_WALL; // генерация уголка
+           game_state.field[j][field_size_x - 1] = FIELD_CELL_TYPE_WALL; // генерация вертикальных стен
         }
     }
 
@@ -1120,6 +1138,7 @@ void start_game() // начало игры
     pause = false;
     color = 1;
     choice_wall = 1;
+    win_game = false;
     clear_field(); // очищение поля
 }
 
@@ -1296,7 +1315,7 @@ void game_control(bool& invert_control, sf::RenderWindow& window)
                 case sf::Keyboard::Escape:
                     game_over = true;
                     window.close();
-                    cout << "You are stopped the game!" << endl;
+                    cout << "You stopped the game!" << endl;
                     cout << "Your score: " << score << endl << endl;
                     game_over = false;
                     break;
@@ -1312,9 +1331,22 @@ void game_control(bool& invert_control, sf::RenderWindow& window)
     }
 }
 
+
+void check_win() {
+    for (int i = 0; i < field_size_y; i++) {
+        for (int j = 0; j < field_size_x; j++) {
+            if (((game_state.field[i][j] != FIELD_CELL_TYPE_APPLE && game_state.field[i][j] != FIELD_CELL_TYPE_GREEN_APPLE && game_state.field[i][j] != FIELD_CELL_TYPE_YELLOW_APPLE && game_state.field[i][j] != FIELD_CELL_TYPE_HEART) || game_state.field[i][j] == FIELD_CELL_TYPE_WALL) && get_random_empty_cell() == -1) {
+                win_game = true;
+            }
+        }
+    }
+}
+
 int main(void) // main
 {
     int restart;
+
+    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
      
     system("color B0"); // цвет консоли
     setlocale(0, ""); // русский язык
@@ -1358,9 +1390,18 @@ int main(void) // main
                     window.clear(sf::Color(255, 0, 0));                   
                     sf::sleep(sf::seconds(1)); // задержка на 1 секунду                   
                     window.close(); // закрытие окна
-                    cout << "It's GAMEOVER!" << endl; //вывод сообщеничя о конце игры 
+                    SetConsoleTextAttribute(hConsole, (WORD)((11 << 4) | 4));
+                    cout << "IT'S GAMEOVER!" << endl; //вывод сообщеничя о конце игры 
+                    SetConsoleTextAttribute(hConsole, (WORD)((11 << 4) | 0));
                     cout << endl << "Your score: " << score << endl << endl; //вывод результата
                 }
+            }
+           
+            if (win_game) {
+                cout << "You have won!" << endl;
+                cout << endl;
+                sf::sleep(sf::seconds(1)); // задержка на 1 секунду       
+                window.close();
             }
 
             window.clear(sf::Color(x, y, z)); //цвет поля
@@ -1369,6 +1410,8 @@ int main(void) // main
             window.display(); // вывод окна
 
             sf::sleep(sf::milliseconds(speed)); // скорость
+
+            check_win();
         }
 
         cout << "Выберите одно из следующих действий: \n\t0 - exit\n\t1 - restart" << endl;; // запрос действия(новая игра или выход)
